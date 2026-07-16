@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Fix compatible-mode cleanup to use the logical CNG key container name.
+- Make Companion removal wait for its PowerShell and command-launcher processes,
+  retry locked-directory deletion and recover after a partial cleanup.
 - Reconnect the exact managed VPN profile automatically when the Companion
   starts while its service is unreachable.
 
@@ -32,6 +34,9 @@
 
 - Correction du nettoyage compatible pour utiliser le nom logique du conteneur
   de clé CNG.
+- Attente des processus PowerShell et du lanceur de commandes lors de la
+  suppression du Companion, nouvelles tentatives si le dossier est verrouillé
+  et reprise possible après un nettoyage partiel.
 - Reconnexion automatique du profil VPN géré exact lorsque le Companion démarre
   alors que son service est injoignable.
 

@@ -202,11 +202,16 @@ class DeliveryTests(unittest.TestCase):
             "Microsoft Software Key Storage Provider", "-delkey $container",
             "$RemoveCompanion", "companion_removed", "CngKey]::Exists",
             "$container = $privateKey.Key.KeyName",
+            "Get-LanPartyCompanionProcesses", "Name='cmd.exe'",
+            "Remove-LanPartyCompanion", "local-companion-recovery",
+            "profile_absent = $true", "Companion processes did not stop",
+            "Companion directory remained locked", "Start-Sleep -Milliseconds 250",
         ):
             self.assertIn(marker, helper)
         self.assertNotIn("$privateKey.Key.UniqueName", helper)
         self.assertNotIn("Stop-Process -Name openvpn", helper)
         self.assertNotIn("Get-ChildItem -Path Cert:", helper)
+        self.assertEqual(1, helper.count("Remove-Item -LiteralPath $Root -Recurse -Force"))
         installer = self.read("install-vpn-server.sh")
         admin = self.read("assets/vpn-enrollment-admin.py")
         self.assertIn("Leave-OpenVPN-LAN-Party.ps1", installer)

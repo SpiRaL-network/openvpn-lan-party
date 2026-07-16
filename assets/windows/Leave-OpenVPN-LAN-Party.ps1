@@ -18,6 +18,84 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$companionRoot = Join-Path $env:LOCALAPPDATA 'OpenVPN LAN Party Companion'
+$shortcutPaths = @(
+    (Join-Path ([Environment]::GetFolderPath('Desktop')) 'LAN Party Companion.lnk'),
+    (Join-Path ([Environment]::GetFolderPath('Startup')) 'LAN Party Companion.lnk'),
+    (Join-Path ([Environment]::GetFolderPath('Startup')) 'OpenVPN LAN Party.lnk'),
+    (Join-Path ([Environment]::GetFolderPath('Programs')) 'OpenVPN LAN Party.lnk')
+)
+
+function Remove-LanPartyShortcuts {
+    foreach ($shortcut in $shortcutPaths) {
+        if (Test-Path -LiteralPath $shortcut -PathType Leaf) {
+            Remove-Item -LiteralPath $shortcut -Force
+        }
+    }
+}
+
+function Get-LanPartyCompanionProcesses {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    $knownPaths = @(
+        (Join-Path $Root 'LAN-Party-Companion.ps1'),
+        (Join-Path $Root 'LAN-PARTY.cmd')
+    )
+    return @(Get-CimInstance Win32_Process `
+        -Filter "Name='powershell.exe' OR Name='pwsh.exe' OR Name='cmd.exe'" `
+        -ErrorAction SilentlyContinue | Where-Object {
+            if (-not $_.CommandLine) { return $false }
+            foreach ($knownPath in $knownPaths) {
+                if ($_.CommandLine.IndexOf(
+                        $knownPath, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+                    return $true
+                }
+            }
+            return $false
+        })
+}
+
+function Remove-LanPartyCompanion {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    if (-not (Test-Path -LiteralPath $Root -PathType Container)) { return $false }
+    $rootItem = Get-Item -LiteralPath $Root -Force
+    if (($rootItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw 'The Companion directory must not be a symbolic link or reparse point.'
+    }
+
+    foreach ($process in (Get-LanPartyCompanionProcesses -Root $Root)) {
+        Stop-Process -Id $process.ProcessId -Force -ErrorAction SilentlyContinue
+    }
+    for ($attempt = 0; $attempt -lt 20; $attempt++) {
+        if ((Get-LanPartyCompanionProcesses -Root $Root).Count -eq 0) { break }
+        Start-Sleep -Milliseconds 250
+    }
+    $remaining = @(Get-LanPartyCompanionProcesses -Root $Root)
+    if ($remaining.Count -gt 0) {
+        $processIds = ($remaining | ForEach-Object { [string]$_.ProcessId }) -join ', '
+        throw "Companion processes did not stop within five seconds (PID: $processIds)."
+    }
+
+    $lastError = $null
+    for ($attempt = 0; $attempt -lt 20; $attempt++) {
+        try {
+            Remove-Item -LiteralPath $Root -Recurse -Force -ErrorAction Stop
+            $lastError = $null
+            break
+        }
+        catch {
+            $lastError = $_.Exception
+            Start-Sleep -Milliseconds 250
+        }
+    }
+    if (Test-Path -LiteralPath $Root) {
+        $detail = if ($lastError) { $lastError.Message } else { 'unknown lock' }
+        throw "The Companion directory remained locked after five seconds: $detail"
+    }
+    return $true
+}
+
 $profileCandidates = @(
     $ProfilePath,
     "$env:USERPROFILE\Documents\OpenVPN\config\OpenVPN-LAN-Party.ovpn"
@@ -29,7 +107,26 @@ foreach ($candidate in $profileCandidates) {
         break
     }
 }
-if (-not $profileItem) { throw 'The OpenVPN-LAN-Party profile was not found.' }
+if (-not $profileItem) {
+    if (-not $RemoveCompanion -or
+        -not (Test-Path -LiteralPath $companionRoot -PathType Container)) {
+        throw 'The OpenVPN-LAN-Party profile was not found.'
+    }
+    if (-not $PSCmdlet.ShouldProcess(
+            $companionRoot,
+            'Complete the pending local Companion cleanup after managed profile removal')) {
+        return
+    }
+    Remove-LanPartyShortcuts
+    $companionRemoved = Remove-LanPartyCompanion -Root $companionRoot
+    [pscustomobject]@{
+        schema = 1
+        action = 'local-companion-recovery'
+        profile_absent = $true
+        companion_removed = $companionRemoved
+    } | ConvertTo-Json
+    return
+}
 if (($profileItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
     throw 'The profile must not be a symbolic link or reparse point.'
 }
@@ -97,30 +194,11 @@ if (Test-Path -LiteralPath $certificatePath) {
 }
 Remove-Item -LiteralPath $profileItem.FullName -Force
 
-$shortcutPaths = @(
-    (Join-Path ([Environment]::GetFolderPath('Desktop')) 'LAN Party Companion.lnk'),
-    (Join-Path ([Environment]::GetFolderPath('Startup')) 'LAN Party Companion.lnk'),
-    (Join-Path ([Environment]::GetFolderPath('Startup')) 'OpenVPN LAN Party.lnk'),
-    (Join-Path ([Environment]::GetFolderPath('Programs')) 'OpenVPN LAN Party.lnk')
-)
-foreach ($shortcut in $shortcutPaths) {
-    if (Test-Path -LiteralPath $shortcut -PathType Leaf) {
-        Remove-Item -LiteralPath $shortcut -Force
-    }
-}
+Remove-LanPartyShortcuts
 
 $companionRemoved = $false
 if ($RemoveCompanion) {
-    $companionRoot = Join-Path $env:LOCALAPPDATA 'OpenVPN LAN Party Companion'
-    if (Test-Path -LiteralPath $companionRoot -PathType Container) {
-        $companionScript = Join-Path $companionRoot 'LAN-Party-Companion.ps1'
-        Get-CimInstance Win32_Process -Filter "Name='powershell.exe' OR Name='pwsh.exe'" -ErrorAction SilentlyContinue |
-            Where-Object { $_.CommandLine -and $_.CommandLine.IndexOf(
-                $companionScript, [StringComparison]::OrdinalIgnoreCase) -ge 0 } |
-            ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
-        Remove-Item -LiteralPath $companionRoot -Recurse -Force
-        $companionRemoved = $true
-    }
+    $companionRemoved = Remove-LanPartyCompanion -Root $companionRoot
 }
 
 [pscustomobject]@{
