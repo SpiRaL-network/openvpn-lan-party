@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+
+die() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
+pass() { printf 'PASS: %s\n' "$*"; }
+mode_owner() {
+    local path=$1 expected=$2 actual
+    actual=$(stat -c '%a:%U:%G' "$path")
+    [[ $actual == "$expected" ]] || die "$path is $actual, expected $expected"
+    pass "$path permissions $actual"
+}
+
+[[ $EUID -eq 0 ]] || die 'run as root: sudo audit-openvpn-lan-party'
+command -v runuser >/dev/null || die 'runuser is unavailable'
+command -v openvpn >/dev/null || die 'openvpn is unavailable'
+command -v openssl >/dev/null || die 'openssl is unavailable'
+getent passwd vpnportal >/dev/null || die 'vpnportal account is missing'
+
+PKI=/root/openvpn-pki
+STATE=/var/lib/openvpn-lan-party/enrollment
+SNAPSHOT=/var/lib/openvpn/credential-registry.json
+SERVER=/etc/openvpn/server/server.conf
+SOCKET=/run/openvpn-lan-party/enrollment-portal-admin.sock
+SERVICE=vpn-enrollment-portal.service
+PORTAL_STATE=/var/lib/openvpn-lan-party/enrollment-portal
+
+mode_owner "$PKI/private/ca.key" 600:root:root
+mode_owner "$STATE" 700:root:root
+mode_owner "$SNAPSHOT" 640:root:nogroup
+mode_owner /etc/openvpn/server/tls-crypt-v2-server.key 600:root:root
+mode_owner /etc/openvpn 711:root:root
+mode_owner /etc/openvpn/server 710:root:nogroup
+mode_owner /etc/openvpn/server/server.conf 600:root:root
+mode_owner /etc/openvpn-lan-party/tls.key 640:root:vpnportal
+mode_owner /etc/openvpn-lan-party/tls.crt 644:root:vpnportal
+mode_owner /etc/openvpn-lan-party/enrollment-portal.json 640:root:vpnportal
+mode_owner "$PORTAL_STATE" 700:vpnportal:vpnportal
+for invitation_bundle in "$PORTAL_STATE"/*.zip; do
+    [[ -e $invitation_bundle ]] || continue
+    [[ -f $invitation_bundle && ! -L $invitation_bundle ]] \
+        || die "unsafe invitation bundle: $invitation_bundle"
+    [[ $(stat -c '%a:%U:%G' "$invitation_bundle") == 600:vpnportal:vpnportal ]] \
+        || die "invitation bundle permissions are unsafe: $invitation_bundle"
+done
+pass 'portal invitation bundles are owner-only regular files'
+
+for CERTIFICATE in "$PKI/ca.crt" /etc/openvpn/server/server.crt; do
+    CERTIFICATE_TEXT=$(openssl x509 -in "$CERTIFICATE" -text -noout) \
+        || die "cannot inspect $CERTIFICATE"
+    grep -Fq 'Public Key Algorithm: id-ecPublicKey' <<<"$CERTIFICATE_TEXT" \
+        || die "$CERTIFICATE is not an EC certificate"
+    grep -Eq 'ASN1 OID: (prime256v1|secp256r1)' <<<"$CERTIFICATE_TEXT" \
+        || die "$CERTIFICATE is not ECDSA P-256"
+done
+pass 'CA and server certificates use ECDSA P-256'
+
+if runuser -u vpnportal -- test -r "$PKI/private/ca.key"; then
+    die 'vpnportal can read the CA private key'
+fi
+pass 'vpnportal cannot read the CA private key'
+
+[[ -S $SOCKET ]] || die 'broker administrator socket is missing'
+[[ $(stat -c '%a:%U:%G' "$SOCKET") == 600:vpnportal:vpnportal ]] \
+    || die 'broker administrator socket permissions are unsafe'
+if runuser -u vpnportal -- /usr/local/sbin/vpn-enrollment-admin --help \
+    >/dev/null 2>&1; then
+    die 'vpnportal crossed the root EUID guard of the administrator tool'
+fi
+pass 'vpnportal cannot invoke the CA administrator tool'
+
+[[ $(systemctl show "$SERVICE" -p User --value) == vpnportal ]] \
+    || die 'portal service user is not vpnportal'
+[[ $(systemctl show "$SERVICE" -p NoNewPrivileges --value) == yes ]] \
+    || die 'NoNewPrivileges is not active'
+[[ $(systemctl show "$SERVICE" -p ProtectHome --value) == yes ]] \
+    || die 'ProtectHome is not active'
+[[ $(systemctl show "$SERVICE" -p ProtectSystem --value) == strict ]] \
+    || die 'ProtectSystem is not strict'
+[[ -z $(systemctl show "$SERVICE" -p CapabilityBoundingSet --value) ]] \
+    || die 'portal service retains Linux capabilities'
+systemctl is-active --quiet "$SERVICE" || die 'portal service is not active'
+pass 'portal systemd confinement is active'
+
+VERSION=$(openvpn --version | head -n1 | sed -En \
+    's/.*OpenVPN[[:space:]]+([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p')
+[[ -n $VERSION ]] || die 'cannot determine OpenVPN version'
+dpkg --compare-versions "$VERSION" ge 2.7.2 \
+    || die "OpenVPN 2.7.2+ is required, found $VERSION"
+grep -Fxq 'tls-crypt-v2 tls-crypt-v2-server.key force-cookie' "$SERVER" \
+    || die 'tls-crypt-v2 force-cookie is not configured'
+if grep -Eq '^[[:space:]]*tls-crypt[[:space:]]' "$SERVER"; then
+    die 'a shared tls-crypt compatibility key is configured'
+fi
+grep -Fxq 'tls-crypt-v2-verify /usr/local/libexec/verify-tls-crypt-v2-player' "$SERVER" \
+    || die 'tls-crypt-v2 metadata verifier is not configured'
+[[ $(grep -Fxc 'script-security 2' "$SERVER") == 1 ]] \
+    || die 'script-security 2 is not configured exactly once'
+runuser -u nobody -- test -r /etc/openvpn/server/crl.pem \
+    || die 'the unprivileged OpenVPN process cannot re-read the CRL'
+runuser -u nobody -- test -x /usr/local/libexec/verify-tls-crypt-v2-player \
+    || die 'the unprivileged OpenVPN process cannot execute the metadata verifier'
+runuser -u nobody -- test -r "$SNAPSHOT" \
+    || die 'the unprivileged OpenVPN process cannot read the metadata registry'
+(cd /etc/openvpn/server && openvpn --config server.conf --test-crypto \
+    --cipher AES-256-GCM) >/dev/null 2>&1 \
+    || die 'OpenVPN cryptographic configuration validation failed'
+pass "OpenVPN $VERSION configuration and runtime access"
+
+if grep -RIlE --include='*.json' 'BEGIN (RSA |EC |)PRIVATE KEY|private_key' "$STATE" \
+    | grep -q .; then
+    die 'enrolment state contains private-key material or a private-key field'
+fi
+pass 'Debian enrolment state contains no player private key'
+
+python3 - "$STATE" <<'PY'
+import json
+import pathlib
+import sys
+
+modes = set()
+for path in (pathlib.Path(sys.argv[1]) / "enrollments").glob("*.json"):
+    state = json.loads(path.read_text(encoding="utf-8"))
+    mode = state.get("security_mode")
+    if mode not in {"high-assurance", "compatible"}:
+        raise SystemExit(f"invalid credential security mode in {path}")
+    modes.add(mode)
+print("PASS: credential security policies are valid" + (f" ({', '.join(sorted(modes))})" if modes else ""))
+PY
+
+printf 'OpenVPN LAN Party server audit passed.\n'

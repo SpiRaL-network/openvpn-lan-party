@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+
+[[ $EUID -eq 0 ]] || {
+    printf 'Error: run this command as root (sudo vpn-enrollment-admin ...).\n' >&2
+    exit 1
+}
+
+exec /usr/bin/python3 /usr/local/libexec/vpn-enrollment-admin.py \
+    --engine /usr/local/libexec/vpn-player-enrollment.py \
+    --state-dir /var/lib/openvpn-lan-party/enrollment \
+    --verification-registry /var/lib/openvpn/credential-registry.json \
+    --admin-socket /run/openvpn-lan-party/enrollment-portal-admin.sock \
+    --public-url 'https://__REMOTE_HOST__:__ENROLLMENT_PORT__' \
+    --ca-cert /root/openvpn-pki/ca.crt \
+    --ca-key /root/openvpn-pki/private/ca.key \
+    --tls-server-key /etc/openvpn/server/tls-crypt-v2-server.key \
+    --portal-tls-cert /etc/openvpn-lan-party/tls.crt \
+    --remote '__REMOTE_HOST__' \
+    --port '__VPN_PORT__' \
+    --proto udp4 \
+    "$@"

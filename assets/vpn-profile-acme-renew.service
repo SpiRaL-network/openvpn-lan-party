@@ -1,0 +1,36 @@
+[Unit]
+Description=Renew the short-lived Let's Encrypt IP certificate for enrollment
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/vpn-enrollment-acme/config.json
+
+[Service]
+Type=oneshot
+UMask=0077
+ExecStart=/usr/local/libexec/vpn-enrollment-acme --config /etc/vpn-enrollment-acme/config.json renew
+Nice=10
+TimeoutStartSec=5min
+
+NoNewPrivileges=true
+CapabilityBoundingSet=CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER
+PrivateDevices=true
+PrivateTmp=true
+ProtectClock=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectHostname=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+ReadWritePaths=/etc/openvpn-lan-party /var/lib/vpn-enrollment-acme /run/lock
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service

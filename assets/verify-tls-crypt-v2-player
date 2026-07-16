@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+# OpenVPN supplies only metadata_type and metadata_file to this process. The
+# verifier reads a minimal root:nogroup snapshot containing no token, CSR,
+# certificate, display name or private material.
+exec /usr/bin/python3 /usr/local/libexec/vpn-player-enrollment.py \
+    --state-dir /nonexistent \
+    --verification-registry /var/lib/openvpn/credential-registry.json \
+    verify-metadata

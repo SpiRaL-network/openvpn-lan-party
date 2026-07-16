@@ -1,0 +1,12 @@
+{
+  "listen_address": "0.0.0.0",
+  "listen_port": __ENROLLMENT_PORT__,
+  "public_host": "__REMOTE_HOST__",
+  "tls_certificate": "/etc/openvpn-lan-party/tls.crt",
+  "tls_private_key": "/etc/openvpn-lan-party/tls.key",
+  "spool_dir": "/var/lib/openvpn-lan-party/enrollment-portal",
+  "admin_socket": "/run/openvpn-lan-party/enrollment-portal-admin.sock",
+  "validator_path": "/usr/local/libexec/vpn-enrollment-csr.py",
+  "rate_limit": 30,
+  "rate_window_seconds": 60
+}

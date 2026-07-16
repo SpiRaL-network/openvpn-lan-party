@@ -1,0 +1,9 @@
+[Unit]
+Description=Ensure the OpenVPN and enrollment port mappings through UPnP
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/upnpc -e OpenVPN-LAN -a __LAN_IP__ __VPN_PORT__ __VPN_PORT__ UDP 0
+ExecStart=/usr/bin/upnpc -e OpenVPN-LAN-Party-Enrollment -a __LAN_IP__ __ENROLLMENT_PORT__ __ENROLLMENT_PORT__ TCP 0

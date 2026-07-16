@@ -1,0 +1,36 @@
+# Generated VPN identities and PKI material
+openvpn-pki/
+openvpn-clients/
+*.crt
+*.key
+*.pem
+*.p12
+*.pfx
+*.ovpn
+
+# Local email credentials
+player-mail.json
+.env
+.env.*
+
+# Build and test output
+*.zip
+*.7z
+*.pyc
+__pycache__/
+.pytest_cache/
+dist/
+
+# Local portal identities and invitation state
+profile-portal.json
+openvpn-profile-portal/
+
+# Generated LAN Party Companion identities and state
+companion.json
+openvpn-lan-companion/
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+*~
+*.swp

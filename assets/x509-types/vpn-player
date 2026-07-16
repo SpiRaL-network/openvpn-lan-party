@@ -1,0 +1,6 @@
+# Strict ECDSA client certificate policy for every player credential.
+basicConstraints = critical, CA:FALSE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+extendedKeyUsage = clientAuth
+keyUsage = critical, digitalSignature

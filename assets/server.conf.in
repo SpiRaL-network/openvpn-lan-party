@@ -1,0 +1,34 @@
+port __VPN_PORT__
+proto udp4
+dev tap0
+
+ca ca.crt
+cert server.crt
+key server.key
+crl-verify crl.pem
+dh none
+tls-crypt-v2 tls-crypt-v2-server.key force-cookie
+tls-crypt-v2-verify /usr/local/libexec/verify-tls-crypt-v2-player
+script-security 2
+
+server-bridge __VPN_SERVER_IP__ 255.255.255.0 __VPN_POOL_START__ __VPN_POOL_END__
+client-to-client
+ifconfig-pool-persist /var/lib/openvpn/server-ipp.txt
+status /run/openvpn-server/status.log 5
+status-version 3
+
+keepalive 10 120
+explicit-exit-notify 1
+persist-key
+persist-tun
+
+user nobody
+group nogroup
+
+remote-cert-tls client
+tls-version-min 1.2
+auth SHA256
+data-ciphers AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305
+allow-compression no
+
+verb 3

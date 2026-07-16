@@ -1,0 +1,10 @@
+{
+  "allowed_subnet": "__VPN_CIDR__",
+  "bind_host": "__VPN_SERVER_IP__",
+  "lobby_disconnect_grace_seconds": 30,
+  "max_request_bytes": 8192,
+  "message_retention": 200,
+  "players_file": "/etc/openvpn-lan-companion/players.json",
+  "port": 8787,
+  "presence_ttl_seconds": 10
+}

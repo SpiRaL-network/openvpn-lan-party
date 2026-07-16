@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh the OpenVPN and enrollment UPnP port mappings
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=5min
+AccuracySec=30s
+Persistent=true
+Unit=openvpn-upnp.service
+
+[Install]
+WantedBy=timers.target

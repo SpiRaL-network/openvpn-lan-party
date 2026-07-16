@@ -1,0 +1,76 @@
+# Acceptance checklist / Recette
+
+## Repository
+
+- `python3 -m unittest discover -s tests -v` passes.
+- `git diff --check`, `bash -n` and shellcheck pass.
+- `build-release.sh` produces a verified archive from the exact annotated tag.
+- The tree contains no generated secrets, `.ovpn`, invitation or
+  `companion.json`.
+
+## Fresh Debian 13 server
+
+- Installation completes without overwriting any prior configuration.
+- CA subject is exactly `OPENVPN LAN PARTY` and CA/server keys are ECDSA P-256.
+- OpenVPN Community is 2.7.2 or newer.
+- OpenVPN, portal and Companion services are active.
+- Companion listens only on the VPN address.
+- `sudo audit-openvpn-lan-party` reports only PASS lines.
+- miniupnpc maps only the configured OpenVPN UDP and enrollment TCP ports.
+
+## High-assurance Windows 11
+
+- Invitation defaults to `high-assurance`.
+- Windows 11 and a ready, unlocked TPM 2.0 are enforced.
+- The key provider is Microsoft Platform Crypto Provider.
+- The ECDSA P-256 private key is non-exportable and an actual export fails.
+- The protected ZIP extracts natively and both English and French UI parse.
+- OpenVPN/TAP installation, approval, profile creation and connection complete.
+- OpenVPN GUI retains the tunnel after the Companion exits and after logon.
+- Desktop, Startup and Start Menu shortcuts are present.
+- Companion identity matches the invitation player.
+
+## Compatible Windows
+
+- The administrator must select `compatible` and acknowledge the warning.
+- Windows is either build 19045 with DisplayVersion 22H2 or Windows 11.
+- The key provider is Microsoft Software Key Storage Provider.
+- The ECDSA P-256 private key is non-exportable and an actual export fails.
+- The same OpenVPN server simultaneously accepts a connected high-assurance
+  player and a connected compatible player.
+- No mode fallback or in-place credential conversion occurs.
+
+## Approval pool
+
+- Create at least two simultaneous invitations with `--no-wait`.
+- Both appear separately in `vpn-enrollment-admin pool`.
+- Selection requires no copied enrollment ID.
+- Full SPKI and short code match the selected Windows request.
+- Rejecting one request cannot affect the other.
+
+## Revocation and offboarding
+
+- Exact credential revocation updates the CRL and disconnects the tunnel.
+- Re-enrollment for the same player rotates credential UUID while preserving
+  the existing Companion identity.
+- `vpn-enrollment-admin offboard` lists all records and asks for confirmation.
+- Every active credential is revoked; pending invitations become unusable.
+- Companion authentication stops without a service restart.
+- Historical enrollment and PKI revocation evidence remains.
+- `Leave-OpenVPN-LAN-Party.ps1 -WhatIf` changes nothing.
+- Confirmed local cleanup removes only the managed profile, key, certificate and
+  shortcuts; `-RemoveCompanion` additionally removes the local Companion.
+
+---
+
+## Résumé français
+
+La recette couvre le dépôt, une installation Debian 13 neuve, la CA
+`OPENVPN LAN PARTY`, l'audit serveur, une vraie connexion Windows 11 avec TPM,
+une vraie connexion compatible Windows 10 22H2 ou Windows 11, la coexistence
+des deux modes, la file d'approbation simultanée, la persistance OpenVPN GUI, le
+Companion bilingue, la révocation, le renouvellement et l'offboarding complet.
+
+Aucune release ne doit être publiée si un test automatique échoue, si un script
+PowerShell ne se parse pas sous Windows PowerShell 5.1, si le mode compatible
+bascule silencieusement, ou si un secret généré apparaît dans l'archive.

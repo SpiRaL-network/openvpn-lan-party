@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "public_ip": "__REMOTE_HOST__",
+  "lan_ip": "__LAN_IP__",
+  "account_email": "__ACME_EMAIL__",
+  "acme_directory": "https://acme-v02.api.letsencrypt.org/directory",
+  "state_directory": "/var/lib/vpn-enrollment-acme",
+  "deploy_certificate": "/etc/openvpn-lan-party/tls.crt",
+  "deploy_private_key": "/etc/openvpn-lan-party/tls.key",
+  "portal_config": "/etc/openvpn-lan-party/enrollment-portal.json",
+  "portal_group": "vpnportal",
+  "portal_service": "vpn-enrollment-portal.service",
+  "update_portal_trust": false,
+  "upnp_enabled": __PORTAL_UPNP__,
+  "challenge_internal_port": 9080,
+  "mapping_lease_seconds": 600,
+  "renew_before_seconds": 259200,
+  "lock_file": "/run/lock/vpn-enrollment-acme.lock"
+}

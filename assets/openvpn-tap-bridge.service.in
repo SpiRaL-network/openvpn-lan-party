@@ -1,0 +1,15 @@
+[Unit]
+Description=Isolated Ethernet bridge for the OpenVPN gaming LAN
+Before=openvpn-server@server.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/ip link add name br-vpn type bridge
+ExecStart=/usr/sbin/ip address add __VPN_SERVER_IP__/24 dev br-vpn
+ExecStart=/usr/sbin/ip tuntap add dev tap0 mode tap user nobody
+ExecStart=/usr/sbin/ip link set dev tap0 master br-vpn
+ExecStart=/usr/sbin/ip link set dev tap0 up
+ExecStart=/usr/sbin/ip link set dev br-vpn up
+ExecStop=/usr/sbin/ip link delete dev tap0
+ExecStop=/usr/sbin/ip link delete dev br-vpn
