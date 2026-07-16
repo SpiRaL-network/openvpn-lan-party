@@ -145,6 +145,18 @@ class DeliveryTests(unittest.TestCase):
         for forbidden in ("Joueur", "Approuver", "[O/N]", "Demande", "Sélection", "Téléchargez"):
             self.assertNotIn(forbidden, admin)
 
+    def test_windows_wizard_distinguishes_archive_password_from_one_time_token(self) -> None:
+        wizard = self.read("assets/windows/Join-VPN.ps1")
+        for marker in (
+            "Password='Mot de passe de l''archive'",
+            "Token='Jeton à usage unique'",
+            "Password='Archive password'",
+            "Token='One-time token'",
+        ):
+            self.assertIn(marker, wizard)
+        self.assertNotIn("Password='Mot de passe de l''invitation'", wizard)
+        self.assertNotIn("Password='Invitation password'", wizard)
+
     def test_disposable_key_loss_helper_is_exact_and_fail_closed(self) -> None:
         helper = self.read("assets/windows/Remove-VPN-Disposable-Identity.ps1")
         client = self.read("assets/windows/Enroll-VPN-High-Assurance.ps1")

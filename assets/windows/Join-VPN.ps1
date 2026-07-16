@@ -57,21 +57,21 @@ $isFrench = [Globalization.CultureInfo]::CurrentUICulture.TwoLetterISOLanguageNa
 $text = if ($isFrench) {
     @{
         Title='Rejoindre OpenVPN LAN Party'; Intro='Cette invitation installe OpenVPN si nécessaire, crée votre identité VPN puis teste la connexion.'
-        Password='Mot de passe de l''invitation'; Token='Jeton à usage unique'; Start='Installer et rejoindre'; Close='Fermer'; Copy='Copier les valeurs'; Ready='Prêt à commencer.'
+        Password='Mot de passe de l''archive'; Token='Jeton à usage unique'; Start='Installer et rejoindre'; Close='Fermer'; Copy='Copier les valeurs'; Ready='Prêt à commencer.'
         Installing='Vérification et installation d''OpenVPN Community avec TAP-Windows6…'; InstallerBusy='Windows Installer est occupé ; nouvelle tentative dans quelques secondes…'; Enrolling='Création de votre identité VPN…'
         Approval='Validation de l''administrateur requise'; Waiting='Laissez cette fenêtre ouverte pendant que l''administrateur valide ces valeurs.'
         Testing='Test isolé de la connexion VPN…'; Persistent='Connexion validée ; démarrage de la session persistante OpenVPN GUI…'; Companion='VPN connecté ; démarrage du Companion…'; Success='Configuration terminée. OpenVPN GUI maintient la connexion indépendamment du Companion.'
-        CredentialsRequired='Saisissez le mot de passe de l''invitation et collez le jeton à usage unique.'; Failed='La configuration a échoué'
+        CredentialsRequired='Saisissez le mot de passe de l''archive et collez le jeton à usage unique.'; Failed='La configuration a échoué'
         BundleExpired='Cette invitation a expiré. Demandez-en une nouvelle à l''administrateur.'
     }
 } else {
     @{
         Title='Join OpenVPN LAN Party'; Intro='This invitation installs OpenVPN when needed, creates your VPN identity, and tests the connection.'
-        Password='Invitation password'; Token='One-time token'; Start='Install and join'; Close='Close'; Copy='Copy values'; Ready='Ready to begin.'
+        Password='Archive password'; Token='One-time token'; Start='Install and join'; Close='Close'; Copy='Copy values'; Ready='Ready to begin.'
         Installing='Checking and installing OpenVPN Community with TAP-Windows6…'; InstallerBusy='Windows Installer is busy; retrying in a few seconds…'; Enrolling='Creating your VPN identity…'
         Approval='Administrator approval required'; Waiting='Keep this window open while the administrator verifies these values.'
         Testing='Running the isolated VPN connection test…'; Persistent='Connection validated; starting the persistent OpenVPN GUI session…'; Companion='VPN connected; starting the Companion…'; Success='Setup complete. OpenVPN GUI keeps the VPN connected independently of the Companion.'
-        CredentialsRequired='Enter the invitation password and paste the one-time token.'; Failed='Setup failed'
+        CredentialsRequired='Enter the archive password and paste the one-time token.'; Failed='Setup failed'
         BundleExpired='This invitation has expired. Ask the administrator for a new one.'
     }
 }
