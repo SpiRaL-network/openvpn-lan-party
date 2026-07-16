@@ -18,6 +18,8 @@ Validated on real Windows hardware:
   connection and Companion startup;
 - exact key-loss cleanup, revocation behavior and re-enrollment;
 - Windows 10 22H2 compatible installation, enrollment and VPN connection.
+- Windows 11 compatible-mode offboarding and exact local cleanup with the VPN
+  and Companion applications already closed.
 
 Not yet validated as a complete matrix:
 
@@ -83,6 +85,8 @@ Validé sur du vrai matériel Windows :
 - nettoyage exact après perte de clé, comportement de révocation et
   ré-enrôlement ;
 - installation, enrôlement et connexion VPN compatibles sous Windows 10 22H2.
+- offboarding compatible et nettoyage local exact sous Windows 11 avec les
+  applications VPN et Companion déjà fermées.
 
 Pas encore validé comme matrice complète :
 

@@ -44,6 +44,8 @@ Confirmed against the 1.0.x implementation:
   re-enrollment for the same Companion player were exercised successfully;
 - Windows 10 22H2 compatible-mode installation, enrollment and VPN connection
   were confirmed on real hardware.
+- Compatible-mode offboarding and exact local cleanup completed on Windows 11
+  after OpenVPN GUI and the Companion had been closed normally.
 
 Still required for complete product acceptance:
 
@@ -113,6 +115,8 @@ Confirmé avec l'implémentation 1.0.x :
   l'identité supprimée et le ré-enrôlement du même joueur Companion ont réussi ;
 - l'installation, l'enrôlement et la connexion VPN en mode compatible sous
   Windows 10 22H2 ont été confirmés sur matériel réel.
+- l'offboarding compatible et le nettoyage local exact ont réussi sous Windows
+  11 après la fermeture normale d'OpenVPN GUI et du Companion.
 
 Encore requis pour une recette produit complète :
 

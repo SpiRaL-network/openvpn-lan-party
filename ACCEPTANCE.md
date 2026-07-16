@@ -14,6 +14,8 @@ Confirmed:
   existing Companion identity;
 - a real Windows 10 22H2 compatible installation, enrollment and tunnel
   connection completed successfully.
+- compatible-mode offboarding and exact local cleanup completed on Windows 11
+  with OpenVPN GUI and the Companion closed before cleanup.
 
 Open acceptance work:
 
@@ -116,6 +118,8 @@ Confirmé :
   remplacer l'identité Companion existante ;
 - une installation, un enrôlement et une connexion au tunnel réels en mode
   compatible sous Windows 10 22H2 ont réussi.
+- l'offboarding compatible et le nettoyage local exact ont réussi sous Windows
+  11 après la fermeture d'OpenVPN GUI et du Companion avant le nettoyage.
 
 Travail de recette encore ouvert :
 

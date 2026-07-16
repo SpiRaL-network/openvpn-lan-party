@@ -44,6 +44,8 @@ secret or player identity.
 - [x] Bilingual protected invitation, guided approval pool and persistent
   OpenVPN GUI handoff.
 - [x] Complete server-side player offboarding and exact Windows cleanup tooling.
+- [x] Compatible-mode offboarding and exact local cleanup on Windows 11 with
+  OpenVPN GUI and the Companion already closed.
 
 ---
 
@@ -102,3 +104,5 @@ identité de joueur.
 - [x] Invitation protégée bilingue, file d'approbation guidée et transfert
   persistant vers OpenVPN GUI.
 - [x] Offboarding serveur complet du joueur et outil de nettoyage Windows exact.
+- [x] Offboarding compatible et nettoyage local exact sous Windows 11 avec
+  OpenVPN GUI et le Companion déjà fermés.
