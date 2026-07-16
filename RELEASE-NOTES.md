@@ -1,35 +1,29 @@
-# OpenVPN LAN Party 1.0.0
+# OpenVPN LAN Party 1.0.1
 
-This release delivers a complete Debian 13 OpenVPN LAN server, protected
-Windows enrollment and a bilingual LAN Party Companion.
+This corrective release clarifies the two secrets requested by the bilingual
+Windows onboarding wizard:
 
-Highlights:
+- **Archive password** decrypts the protected invitation payload.
+- **One-time token** authorizes the enrollment request.
 
-- per-invitation TPM-backed high-assurance or software-backed compatible keys;
-- both client policies coexist on one OpenVPN server;
-- administrator-approved SPKI enrollment with one-time protected invitations;
-- per-credential certificate, CRL and `tls-crypt-v2` protection;
-- automatic OpenVPN Community and TAP-Windows6 setup;
-- persistent OpenVPN GUI connection and Companion shortcuts;
-- presence, latency, chat and game lobbies;
-- complete player revocation and local Windows cleanup.
+The previous "Invitation password" label was ambiguous. No archive format,
+cryptographic protocol, credential, VPN profile or Companion identity changes
+in this release.
 
-Compatible mode requires Windows 10 22H2 build 19045 or Windows 11 and carries
-no TPM hardware isolation. The administrator must explicitly accept that policy
-for each compatible invitation.
+All OpenVPN LAN Party 1.0.0 security modes and workflows remain compatible.
 
 ---
 
-# OpenVPN LAN Party 1.0.0 — Français
+# OpenVPN LAN Party 1.0.1 — Français
 
-Cette version fournit un serveur OpenVPN LAN complet pour Debian 13, un
-enrôlement Windows protégé et un LAN Party Companion bilingue.
+Cette version corrective clarifie les deux secrets demandés par l'assistant
+Windows bilingue :
 
-Points principaux : modes haute assurance TPM ou compatible choisis par
-invitation sur le même serveur, approbation SPKI, certificat et
-`tls-crypt-v2` individuels, installation automatique OpenVPN/TAP, connexion
-persistante, présence, latence, messages, salons et offboarding complet.
+- le **mot de passe de l'archive** déchiffre l'invitation protégée ;
+- le **jeton à usage unique** autorise la demande d'enrôlement.
 
-Le mode compatible exige Windows 10 22H2 build 19045 ou Windows 11 et ne fournit
-pas d'isolation TPM. L'administrateur doit l'accepter explicitement pour chaque
-invitation.
+L'ancien libellé « Mot de passe de l'invitation » était ambigu. Cette version ne
+modifie ni le format de l'archive, ni le protocole cryptographique, ni les
+identifiants, ni les profils VPN, ni l'identité Companion.
+
+Tous les modes de sécurité et workflows de la version 1.0.0 restent compatibles.

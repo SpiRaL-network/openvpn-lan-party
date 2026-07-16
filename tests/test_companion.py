@@ -462,7 +462,7 @@ class CompanionTests(unittest.TestCase):
 
     def test_v3_state_exposes_connection_and_lobby_capabilities(self) -> None:
         state = self.request("GET", "/api/v2/state", "Arthur")[1]
-        self.assertEqual(state["server_version"], "1.0.0")
+        self.assertEqual(state["server_version"], "1.0.1")
         self.assertEqual(state["minimum_client_version"], "0.2.0")
         self.assertIn("presence_duration", state["features"])
         self.assertIn("manual_availability", state["features"])

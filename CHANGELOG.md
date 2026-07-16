@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+- Clarify that the first Windows onboarding secret is the archive password.
+- Keep the archive password distinct from the one-time enrollment token in
+  both English and French.
+
 ## 1.0.0
 
 - Debian 13 OpenVPN LAN deployment with TAP-Windows6 clients.
