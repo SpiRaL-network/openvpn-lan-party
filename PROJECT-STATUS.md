@@ -27,5 +27,32 @@ Version: `1.0.1`
 - Compatible mode requires a real Windows 10 22H2 build 19045 acceptance run
   before it is advertised as hardware-validated.
 
+## Acceptance evidence — 2026-07-16
+
+Confirmed against the 1.0.x implementation:
+
+- all 91 automated repository tests pass;
+- the 1.0.1 archive was built from its exact annotated tag, downloaded again
+  from GitHub and verified against SHA-256;
+- Windows 11 high-assurance enrollment creates an ECDSA P-256 key with
+  Microsoft Platform Crypto Provider, refuses private-key export, connects with
+  OpenVPN Community 2.7.5 and hands the persistent tunnel to OpenVPN GUI;
+- exact Windows key-loss cleanup, failed reuse of the removed identity and
+  re-enrollment for the same Companion player were exercised successfully;
+- Windows 10 22H2 compatible-mode installation, enrollment and VPN connection
+  were confirmed on real hardware.
+
+Still required for complete product acceptance:
+
+- real game traffic over the compatible Windows 10 tunnel;
+- a simultaneous high-assurance and compatible client test on the same server;
+- a complete install and all-PASS audit on a fresh Debian 13 host;
+- a real compatible-mode Windows offboarding run.
+
+The current Debian test machine intentionally preserves its historical RSA CA
+and existing identities. Its application services are operational, but its CA
+cannot satisfy the fresh-install EC P-256 audit and must not be cited as that
+acceptance evidence.
+
 The repository must never contain generated invitation bundles, profiles,
 private keys, bearer tokens, credential registries or `companion.json`.

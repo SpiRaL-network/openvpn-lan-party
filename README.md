@@ -203,7 +203,8 @@ validation before signing. Never publish generated profiles, private keys,
 invitation payloads or a real `companion.json`.
 
 See [HIGH-ASSURANCE.md](HIGH-ASSURANCE.md), [SECURITY.md](SECURITY.md),
-[COMPANION.md](COMPANION.md) and [ACCEPTANCE.md](ACCEPTANCE.md).
+[COMPANION.md](COMPANION.md), [ACCEPTANCE.md](ACCEPTANCE.md),
+[SECURITY-ROADMAP.md](SECURITY-ROADMAP.md) and [TODO.md](TODO.md).
 
 ## Development
 
