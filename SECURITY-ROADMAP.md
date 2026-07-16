@@ -20,13 +20,16 @@ Validated on real Windows hardware:
 - Windows 10 22H2 compatible installation, enrollment and VPN connection.
 - Windows 11 compatible-mode offboarding and exact local cleanup with the VPN
   and Companion applications already closed.
+- Windows 10 compatible offboarding, revoked-profile rejection and recovery
+  from a partial cleanup with a locked Companion directory.
 
 Not yet validated as a complete matrix:
 
 - real game traffic on the Windows 10 compatible endpoint;
 - simultaneous high-assurance and compatible clients;
-- compatible-mode offboarding on Windows 10;
 - a fresh Debian 13 installation with an all-PASS security audit.
+- automatic exact-profile reconnect from a disconnected Companion launch on
+  real Windows 10 and Windows 11 systems.
 
 ## Prioritized candidates
 
@@ -87,13 +90,16 @@ Validé sur du vrai matériel Windows :
 - installation, enrôlement et connexion VPN compatibles sous Windows 10 22H2.
 - offboarding compatible et nettoyage local exact sous Windows 11 avec les
   applications VPN et Companion déjà fermées.
+- offboarding compatible Windows 10, refus du profil révoqué et reprise après un
+  nettoyage partiel avec dossier Companion verrouillé.
 
 Pas encore validé comme matrice complète :
 
 - trafic d'un vrai jeu sur le poste compatible Windows 10 ;
 - clients high-assurance et compatible connectés simultanément ;
-- offboarding compatible sous Windows 10 ;
 - installation Debian 13 neuve avec audit de sécurité entièrement PASS.
+- reconnexion automatique du profil exact lors du lancement d'un Companion
+  déconnecté sur de vrais systèmes Windows 10 et Windows 11.
 
 ## Candidats priorisés
 

@@ -13,7 +13,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 [Windows.Forms.Application]::EnableVisualStyles()
 
-$script:ClientVersion = '1.0.1'
+$script:ClientVersion = '1.0.2'
 $script:StatusIds = @('online', 'afk', 'busy')
 $script:RequiredServerFeatures = @(
     'presence_duration',

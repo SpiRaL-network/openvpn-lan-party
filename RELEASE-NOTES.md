@@ -1,29 +1,54 @@
-# OpenVPN LAN Party 1.0.1
+# OpenVPN LAN Party 1.0.2
 
-This corrective release clarifies the two secrets requested by the bilingual
-Windows onboarding wizard:
+This corrective release improves Windows cleanup and Companion startup:
 
-- **Archive password** decrypts the protected invitation payload.
-- **One-time token** authorizes the enrollment request.
+- compatible-mode cleanup uses the logical CNG key container name and its
+  partial-cleanup recovery is validated on Windows 10;
+- Companion removal waits for its PowerShell and command-launcher processes,
+  retries transient directory locks and can resume after a partial cleanup;
+- launching the Companion reconnects only the exact managed
+  `OpenVPN-LAN-Party` profile when its VPN service is unreachable;
+- public documentation now contains complete English followed by complete
+  French with automated structural-parity checks.
 
-The previous "Invitation password" label was ambiguous. No archive format,
-cryptographic protocol, credential, VPN profile or Companion identity changes
-in this release.
+Automatic VPN reconnection validates the exact managed profile, rejects
+ambiguous or reparse-point paths, waits at most 60 seconds and remains
+non-blocking after failure. It never creates a new credential or targets another
+VPN profile.
 
-All OpenVPN LAN Party 1.0.0 security modes and workflows remain compatible.
+Real-hardware automatic reconnect remains an explicit acceptance task for
+Windows 10 and Windows 11.
+
+No PKI, enrollment protocol, archive format, certificate policy or VPN profile
+format changes in this release. Existing 1.0.1 identities remain compatible and
+do not require re-enrollment.
 
 ---
 
-# OpenVPN LAN Party 1.0.1 — Français
+# OpenVPN LAN Party 1.0.2 — Français
 
-Cette version corrective clarifie les deux secrets demandés par l'assistant
-Windows bilingue :
+Cette version corrective améliore le nettoyage Windows et le démarrage du
+Companion :
 
-- le **mot de passe de l'archive** déchiffre l'invitation protégée ;
-- le **jeton à usage unique** autorise la demande d'enrôlement.
+- le nettoyage compatible utilise le nom logique du conteneur de clé CNG et sa
+  reprise après nettoyage partiel est validée sous Windows 10 ;
+- la suppression du Companion attend ses processus PowerShell et son lanceur de
+  commandes, réessaie les verrouillages transitoires du dossier et peut reprendre
+  après un nettoyage partiel ;
+- lancer le Companion reconnecte uniquement le profil géré exact
+  `OpenVPN-LAN-Party` lorsque son service VPN est injoignable ;
+- la documentation publique contient désormais l'anglais complet suivi du
+  français complet, avec contrôle automatisé de parité structurelle.
 
-L'ancien libellé « Mot de passe de l'invitation » était ambigu. Cette version ne
-modifie ni le format de l'archive, ni le protocole cryptographique, ni les
-identifiants, ni les profils VPN, ni l'identité Companion.
+La reconnexion VPN automatique valide le profil géré exact, refuse les chemins
+ambigus ou de type reparse point, attend au maximum 60 secondes et reste non
+bloquante après un échec. Elle ne crée jamais de nouveau credential et ne cible
+aucun autre profil VPN.
 
-Tous les modes de sécurité et workflows de la version 1.0.0 restent compatibles.
+La reconnexion automatique sur matériel réel reste une tâche de recette
+explicite sous Windows 10 et Windows 11.
+
+Cette version ne modifie ni la PKI, ni le protocole d'enrôlement, ni le format de
+l'archive, ni la politique de certificat, ni le format du profil VPN. Les
+identités 1.0.1 existantes restent compatibles et ne nécessitent aucun
+ré-enrôlement.

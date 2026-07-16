@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.2
 
 - Fix compatible-mode cleanup to use the logical CNG key container name.
 - Make Companion removal wait for its PowerShell and command-launcher processes,
@@ -30,7 +30,7 @@
 
 # Journal des modifications — Français
 
-## Non publié
+## 1.0.2
 
 - Correction du nettoyage compatible pour utiliser le nom logique du conteneur
   de clé CNG.

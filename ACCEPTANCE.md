@@ -4,7 +4,7 @@
 
 Confirmed:
 
-- 91 automated tests pass on the 1.0.1 release tree;
+- 94 automated tests pass on the 1.0.2 release tree;
 - the tagged 1.0.1 ZIP was verified locally and after downloading it from the
   GitHub release;
 - a real Windows 11 high-assurance enrollment, TPM-backed non-exportable key,
@@ -16,6 +16,9 @@ Confirmed:
   connection completed successfully.
 - compatible-mode offboarding and exact local cleanup completed on Windows 11
   with OpenVPN GUI and the Companion closed before cleanup.
+- Windows 10 compatible offboarding disconnected the tunnel, rejected the
+  revoked profile and resumed successfully after a partial local cleanup left
+  only a locked Companion directory.
 
 Open acceptance work:
 
@@ -23,7 +26,8 @@ Open acceptance work:
 - connect high-assurance and compatible clients simultaneously;
 - run the complete installer and obtain an all-PASS audit on a fresh Debian 13
   host;
-- exercise compatible-mode offboarding on real Windows 10 hardware.
+- exercise exact-profile automatic reconnect by launching the Companion with a
+  disconnected tunnel on real Windows 10 and Windows 11 systems.
 
 The preserved Debian test server has a historical RSA CA. It is suitable for
 application regression testing but is not fresh-install acceptance evidence for
@@ -108,7 +112,7 @@ back, or a generated secret appears in the archive.
 
 Confirmé :
 
-- les 91 tests automatisés passent sur l'arborescence de release 1.0.1 ;
+- les 94 tests automatisés passent sur l'arborescence de release 1.0.2 ;
 - le ZIP 1.0.1 tagué a été vérifié localement puis après son téléchargement
   depuis la release GitHub ;
 - un enrôlement haute assurance réel sous Windows 11, une clé TPM non
@@ -120,6 +124,9 @@ Confirmé :
   compatible sous Windows 10 22H2 ont réussi.
 - l'offboarding compatible et le nettoyage local exact ont réussi sous Windows
   11 après la fermeture d'OpenVPN GUI et du Companion avant le nettoyage.
+- l'offboarding compatible Windows 10 a déconnecté le tunnel, refusé le profil
+  révoqué et repris avec succès après qu'un nettoyage local partiel n'a laissé
+  qu'un dossier Companion verrouillé.
 
 Travail de recette encore ouvert :
 
@@ -127,7 +134,8 @@ Travail de recette encore ouvert :
 - connecter simultanément des clients high-assurance et compatible ;
 - exécuter l'installateur complet et obtenir un audit entièrement PASS sur un
   hôte Debian 13 neuf ;
-- tester l'offboarding compatible sur du vrai matériel Windows 10.
+- tester la reconnexion automatique du profil exact en lançant le Companion avec
+  un tunnel déconnecté sur de vrais systèmes Windows 10 et Windows 11.
 
 Le serveur Debian de test conservé possède une ancienne CA RSA. Il convient aux
 tests de régression applicatifs, mais ne constitue pas une preuve de recette

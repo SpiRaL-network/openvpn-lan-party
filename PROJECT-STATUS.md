@@ -1,6 +1,6 @@
 # Project status
 
-Version: `1.0.1`
+Version: `1.0.2`
 
 ## Delivered architecture
 
@@ -34,7 +34,7 @@ Version: `1.0.1`
 
 Confirmed against the 1.0.x implementation:
 
-- all 91 automated repository tests pass;
+- all 94 automated repository tests pass;
 - the 1.0.1 archive was built from its exact annotated tag, downloaded again
   from GitHub and verified against SHA-256;
 - Windows 11 high-assurance enrollment creates an ECDSA P-256 key with
@@ -46,13 +46,17 @@ Confirmed against the 1.0.x implementation:
   were confirmed on real hardware.
 - Compatible-mode offboarding and exact local cleanup completed on Windows 11
   after OpenVPN GUI and the Companion had been closed normally.
+- Windows 10 compatible offboarding disconnected the tunnel, rejected reuse of
+  the revoked profile and completed exact Companion cleanup after resuming from
+  a partial deletion with the application directory initially locked.
 
 Still required for complete product acceptance:
 
 - real game traffic over the compatible Windows 10 tunnel;
 - a simultaneous high-assurance and compatible client test on the same server;
 - a complete install and all-PASS audit on a fresh Debian 13 host;
-- a real compatible-mode Windows offboarding run.
+- automatic exact-profile reconnect from a real disconnected Companion launch
+  on Windows 10 and Windows 11.
 
 The current Debian test machine intentionally preserves its historical RSA CA
 and existing identities. Its application services are operational, but its CA
@@ -66,7 +70,7 @@ private keys, bearer tokens, credential registries or `companion.json`.
 
 # État du projet — Français
 
-Version : `1.0.1`
+Version : `1.0.2`
 
 ## Architecture livrée
 
@@ -104,7 +108,7 @@ Version : `1.0.1`
 
 Confirmé avec l'implémentation 1.0.x :
 
-- les 91 tests automatisés du dépôt réussissent ;
+- les 94 tests automatisés du dépôt réussissent ;
 - l'archive 1.0.1 a été construite depuis son tag annoté exact, retéléchargée
   depuis GitHub et vérifiée par SHA-256 ;
 - l'enrôlement Windows 11 haute assurance crée une clé ECDSA P-256 avec
@@ -117,6 +121,10 @@ Confirmé avec l'implémentation 1.0.x :
   Windows 10 22H2 ont été confirmés sur matériel réel.
 - l'offboarding compatible et le nettoyage local exact ont réussi sous Windows
   11 après la fermeture normale d'OpenVPN GUI et du Companion.
+- l'offboarding compatible Windows 10 a déconnecté le tunnel, refusé la
+  réutilisation du profil révoqué et terminé le nettoyage Companion exact après
+  la reprise d'une suppression partielle dont le dossier applicatif était
+  initialement verrouillé.
 
 Encore requis pour une recette produit complète :
 
@@ -124,7 +132,8 @@ Encore requis pour une recette produit complète :
 - test simultané d'un client high-assurance et d'un client compatible sur le
   même serveur ;
 - installation complète et audit entièrement PASS sur un hôte Debian 13 neuf ;
-- offboarding réel du mode compatible sous Windows 10.
+- reconnexion automatique du profil exact lors d'un vrai lancement du Companion
+  déconnecté sous Windows 10 et Windows 11.
 
 La machine Debian de test actuelle conserve intentionnellement son ancienne CA
 RSA et ses identités existantes. Ses services applicatifs fonctionnent, mais sa

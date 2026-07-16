@@ -13,8 +13,6 @@ secret or player identity.
   the same time; verify VPN traffic, Companion presence and game reachability.
 - [ ] Install on a fresh Debian 13 host and obtain only PASS results from
   `audit-openvpn-lan-party` with the `OPENVPN LAN PARTY` EC P-256 CA.
-- [ ] Offboard a compatible identity on real Windows 10 hardware and verify
-  immediate server cutoff plus exact local cleanup.
 - [ ] Launch the Companion with a disconnected tunnel on real Windows 10 and
   Windows 11 systems and verify exact-profile automatic reconnection.
 
@@ -46,6 +44,8 @@ secret or player identity.
 - [x] Complete server-side player offboarding and exact Windows cleanup tooling.
 - [x] Compatible-mode offboarding and exact local cleanup on Windows 11 with
   OpenVPN GUI and the Companion already closed.
+- [x] Windows 10 compatible offboarding, revoked-profile rejection and resumed
+  Companion cleanup after a partial deletion left its directory locked.
 
 ---
 
@@ -67,8 +67,6 @@ identité de joueur.
 - [ ] Installer sur un hôte Debian 13 neuf et obtenir uniquement des résultats
   PASS avec `audit-openvpn-lan-party` et la CA EC P-256
   `OPENVPN LAN PARTY`.
-- [ ] Offboarder une identité compatible sur du vrai matériel Windows 10 et
-  vérifier la coupure serveur immédiate ainsi que le nettoyage local exact.
 - [ ] Lancer le Companion avec le tunnel déconnecté sur de vrais systèmes
   Windows 10 et Windows 11 et vérifier la reconnexion automatique du profil
   exact.
@@ -106,3 +104,6 @@ identité de joueur.
 - [x] Offboarding serveur complet du joueur et outil de nettoyage Windows exact.
 - [x] Offboarding compatible et nettoyage local exact sous Windows 11 avec
   OpenVPN GUI et le Companion déjà fermés.
+- [x] Offboarding compatible Windows 10, refus du profil révoqué et reprise du
+  nettoyage Companion après une suppression partielle ayant laissé son dossier
+  verrouillé.

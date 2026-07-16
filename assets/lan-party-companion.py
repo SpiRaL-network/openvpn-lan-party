@@ -34,7 +34,7 @@ except ImportError:  # pragma: no cover - exercised by the Windows test runner
     import msvcrt
 
 
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.0.2"
 PLAYER_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$")
 TOKEN_PATTERN = re.compile(r"^[A-Za-z0-9_-]{32,128}$")
 TOKEN_HASH_PATTERN = re.compile(r"^[0-9a-f]{64}$")
