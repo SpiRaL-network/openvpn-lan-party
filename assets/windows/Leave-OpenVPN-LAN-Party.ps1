@@ -55,7 +55,10 @@ if (-not $privateKey -or -not ($privateKey -is [Security.Cryptography.ECDsaCng])
 }
 try {
     $provider = $privateKey.Key.Provider.Provider
-    $container = $privateKey.Key.UniqueName
+    # KeyName is the logical CNG container created by certreq and accepted by
+    # certutil -delkey. UniqueName may instead expose a provider-specific
+    # backing-store identifier, notably with the software provider.
+    $container = $privateKey.Key.KeyName
     $expectedProvider = if ($modeMatch.Groups[1].Value -eq 'high-assurance') {
         'Microsoft Platform Crypto Provider'
     } else {

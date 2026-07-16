@@ -201,8 +201,10 @@ class DeliveryTests(unittest.TestCase):
             "Microsoft Platform Crypto Provider",
             "Microsoft Software Key Storage Provider", "-delkey $container",
             "$RemoveCompanion", "companion_removed", "CngKey]::Exists",
+            "$container = $privateKey.Key.KeyName",
         ):
             self.assertIn(marker, helper)
+        self.assertNotIn("$privateKey.Key.UniqueName", helper)
         self.assertNotIn("Stop-Process -Name openvpn", helper)
         self.assertNotIn("Get-ChildItem -Path Cert:", helper)
         installer = self.read("install-vpn-server.sh")
