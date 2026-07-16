@@ -1,4 +1,4 @@
-# Security architecture / Architecture de sécurité
+# Security architecture
 
 ## Trust model
 
@@ -65,23 +65,76 @@ the CRL or the trusted-peer requirement.
 
 ---
 
-## Architecture — Français
+# Architecture de sécurité — Français
+
+## Modèle de confiance
 
 OpenVPN LAN Party protège l'accès à un LAN virtuel partagé par un petit groupe
-de confiance. Il ne cloisonne pas les joueurs déjà admis.
+de pairs de confiance. Il protège l'accès à ce LAN virtuel ; il ne cloisonne pas
+les joueurs déjà admis.
 
-La clé ECDSA P-256 est créée sur Windows et reste non exportable dans CNG. Seule
-la CSR PKCS#10 atteint le portail. L'outil root revalide le CN, la courbe, les
-extensions et l'empreinte SPKI complète avant signature. Chaque credential
-reçoit son certificat et sa clé `tls-crypt-v2` individuels.
+## Frontière d'enrôlement
 
-Le mode `high-assurance` exige Windows 11, un TPM 2.0 prêt et Microsoft Platform
-Crypto Provider. Le mode `compatible` accepte Windows 10 22H2 build 19045 ou
-Windows 11 avec Microsoft Software Key Storage Provider. Les deux modes
-coexistent sur le serveur, mais aucun credential ne change de mode en place et
-aucun fallback automatique n'est autorisé.
+1. Root crée une invitation avec un identifiant de joueur stable, un nouvel UUID
+   de credential, le CN exact du certificat, le mode de sécurité, l'expiration
+   et un jeton à usage unique.
+2. Le portail public ne stocke que le SHA-256 du jeton et fournit un ZIP borné.
+3. Windows déchiffre l'invitation, vérifie le hash de chaque script et crée
+   localement une clé ECDSA P-256.
+4. Windows soumet uniquement une CSR PKCS#10. La clé privée ne quitte jamais
+   CNG.
+5. L'outil d'approbation root revalide le CN, l'algorithme, la courbe, les
+   extensions et l'empreinte SPKI complète avant la signature.
+6. Easy-RSA émet le certificat et OpenVPN crée une clé cliente
+   `tls-crypt-v2` individuelle avec les métadonnées canoniques du credential.
+7. La réponse à usage unique est supprimée après sa collecte ; seules
+   l'identité publique du certificat et les métadonnées de révocation restent.
 
-La révocation régénère la CRL, invalide les métadonnées `tls-crypt-v2` et coupe
-les sessions. L'offboarding applique cette révocation à toutes les identités du
-joueur, invalide les invitations et supprime son accès Companion, tout en
-conservant les preuves d'audit.
+Le portail s'exécute sous `vpnportal` dans une unité systemd restreinte. Il ne
+peut ni lire la clé de la CA ni invoquer la commande d'administration root.
+L'opération de CA est sérialisée par un verrou root et accessible par une socket
+Unix bornée.
+
+## Politique par credential
+
+- `high-assurance` : Windows 11, TPM 2.0, Microsoft Platform Crypto Provider.
+- `compatible` : Windows 10 22H2 build 19045 ou Windows 11, Microsoft Software
+  Key Storage Provider.
+
+Les deux utilisent des clés ECDSA P-256 non exportables, la sélection par
+empreinte exacte, des certificats individuels, l'application de la CRL,
+`tls-crypt-v2`, TLS 1.2 minimum et des chiffrements de données AEAD. Le mode
+compatible ne fournit pas d'isolation matérielle de la clé. Aucun fallback ne
+se produit.
+
+Le client officiel vérifie le fournisseur local, l'algorithme, la taille de clé
+et le refus réel d'export. Le serveur n'implémente pas d'attestation TPM
+distante ; un client altéré pourrait mentir sur son fournisseur local. Cette
+limite n'est acceptée que dans le modèle de pairs de confiance.
+
+## Révocation et offboarding
+
+La révocation d'un credential s'effectue en deux phases : marquage en cours de
+révocation, révocation dans la base Easy-RSA partagée, génération et validation
+d'une nouvelle CRL, déploiement atomique, redémarrage d'OpenVPN pour couper les
+sessions, puis marquage du credential comme révoqué dans le registre de
+vérification `tls-crypt-v2`.
+
+L'offboarding d'un joueur applique ce processus à chaque credential actif,
+annule toutes les invitations et réponses à usage unique en attente, supprime
+l'authentification Companion et désactive le mapping du joueur. L'historique des
+enrôlements et les entrées PKI révoquées restent disponibles pour l'audit. Le
+nettoyage local Windows est une action explicite et séparée.
+
+## Périmètre cryptographique
+
+P-256 est choisi intentionnellement pour sa large interopérabilité avec Windows
+CNG, les TPM et OpenVPN Community. AES-256-GCM est préféré pour le canal de
+données ; AES-128-GCM et ChaCha20-Poly1305 restent des alternatives modernes
+négociées. Une courbe portant un nombre supérieur n'améliore pas
+automatiquement le système si la compatibilité des fournisseurs ou la fiabilité
+opérationnelle diminuent.
+
+`tls-crypt-v2` authentifie et masque le canal de contrôle avant l'authentification
+TLS normale et lie les métadonnées par credential. Il ne remplace ni X.509, ni
+la CRL, ni l'exigence de pairs de confiance.

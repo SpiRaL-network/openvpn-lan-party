@@ -1,4 +1,4 @@
-# Operational TODO / Suivi opérationnel
+# Operational TODO
 
 This is the actionable tracker. `SECURITY-ROADMAP.md` records strategic
 direction, while `ACCEPTANCE.md` defines the normative test procedure. Mark an
@@ -45,15 +45,55 @@ secret or player identity.
 
 ---
 
-## Français
+# Suivi opérationnel — Français
 
-Ce fichier est la liste d'actions concrètes. La priorité P0 consiste à valider
-un vrai jeu sous Windows 10, la coexistence simultanée des deux modes,
-l'installation avec audit complet sur une Debian 13 neuve et l'offboarding réel
-du mode compatible.
+Ce fichier est le suivi des actions concrètes. `SECURITY-ROADMAP.md` consigne
+l'orientation stratégique, tandis que `ACCEPTANCE.md` définit la procédure de
+recette normative. Une tâche ne doit être marquée comme terminée que lorsqu'une
+preuve reproductible existe et ne contient aucun secret de déploiement ni
+identité de joueur.
 
-La priorité P1 couvre la sauvegarde/restauration chiffrée, les alertes
-d'expiration, la rotation des jetons Companion, la signature reproductible du
-paquet Windows et l'élargissement de la matrice matérielle. L'attestation TPM
-distante reste une recherche P2. Une case ne doit être cochée qu'avec une preuve
-reproductible ne contenant aucun secret ni identité de joueur.
+## P0 — terminer la recette
+
+- [ ] Tester le trafic d'un vrai jeu à travers un tunnel compatible Windows 10
+  22H2, avec connexion directe par IP et découverte LAN lorsque le jeu la prend
+  en charge.
+- [ ] Connecter simultanément un client Windows 11 high-assurance et un client
+  compatible ; vérifier le trafic VPN, la présence Companion et l'accès au jeu.
+- [ ] Installer sur un hôte Debian 13 neuf et obtenir uniquement des résultats
+  PASS avec `audit-openvpn-lan-party` et la CA EC P-256
+  `OPENVPN LAN PARTY`.
+- [ ] Offboarder une identité compatible sur du vrai matériel Windows 10 et
+  vérifier la coupure serveur immédiate ainsi que le nettoyage local exact.
+
+## P1 — durcissement opérationnel
+
+- [ ] Documenter, chiffrer et tester la sauvegarde/restauration de la CA, de la
+  CRL, de l'état d'enrôlement, du registre des credentials et de l'identité du
+  serveur Companion.
+- [ ] Ajouter un inventaire de révocation et d'expiration des certificats plus
+  riche, avec notifications administrateur planifiées.
+- [ ] Concevoir la rotation et la récupération des jetons Companion
+  indépendamment du renouvellement des certificats VPN.
+- [ ] Produire un paquet Windows signé avec provenance reproductible.
+- [ ] Étendre la matrice de test sur matériel réel aux builds Windows 11
+  maintenus et aux environnements Windows 10 22H2 explicitement acceptés.
+
+## P2 — recherche
+
+- [ ] Réévaluer l'attestation TPM distante uniquement si l'intégration Windows
+  et OpenVPN peut rester fiable et fail-closed.
+
+## Base terminée
+
+- [x] Enrôlement Windows 11 haute assurance adossé au TPM et connexion
+  persistante.
+- [x] Vérification de la clé ECDSA P-256 non exportable et échec d'un export
+  réel.
+- [x] Nettoyage exact après perte de clé, échec du profil révoqué et
+  ré-enrôlement.
+- [x] Installation, enrôlement et connexion VPN compatibles sous Windows 10
+  22H2.
+- [x] Invitation protégée bilingue, file d'approbation guidée et transfert
+  persistant vers OpenVPN GUI.
+- [x] Offboarding serveur complet du joueur et outil de nettoyage Windows exact.

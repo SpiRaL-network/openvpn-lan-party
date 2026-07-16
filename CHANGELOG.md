@@ -17,3 +17,28 @@
 - Bilingual Companion with authenticated presence, chat and game lobbies.
 - Complete server and Windows offboarding procedures.
 - miniupnpc and optional public portal TLS automation.
+
+---
+
+# Journal des modifications — Français
+
+## 1.0.1
+
+- Clarification : le premier secret demandé par l'assistant Windows est le mot
+  de passe de l'archive.
+- Distinction explicite entre le mot de passe de l'archive et le jeton
+  d'enrôlement à usage unique, en anglais comme en français.
+
+## 1.0.0
+
+- Déploiement d'un LAN OpenVPN sur Debian 13 avec des clients TAP-Windows6.
+- Credentials ECDSA P-256 non exportables créés côté client.
+- Politiques de sécurité high-assurance et compatible choisies par invitation.
+- Invitations protégées sur le portail et file d'approbation administrateur
+  guidée.
+- Clés `tls-crypt-v2` individuelles, révocation CRL et coupure immédiate des
+  sessions.
+- Enrôlement Windows bilingue automatisé et connexion OpenVPN GUI persistante.
+- Companion bilingue avec présence authentifiée, messages et salons de jeu.
+- Procédures complètes d'offboarding serveur et Windows.
+- miniupnpc et automatisation TLS publique facultative du portail.

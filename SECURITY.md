@@ -34,16 +34,29 @@ does not block direct access to a host's game port from the shared VPN.
 
 ---
 
-# Politique de sécurité
+# Politique de sécurité — Français
+
+## Signaler une vulnérabilité
 
 Signalez les vulnérabilités en privé avec la fonction GitHub **Security >
 Report a vulnerability** lorsqu'elle est disponible. Ne publiez jamais dans
-une issue une clé privée, un profil VPN, une adresse IP publique, un jeton ou
-des identifiants de diagnostic TPM/CNG.
+une issue des credentials, des clés privées, des profils VPN, des adresses IP
+publiques, des bearer tokens ou des identifiants de diagnostic TPM/CNG.
 
-La PKI, l'état réel d'enrôlement, les profils et tous les `companion.json`
-générés ne doivent jamais être ajoutés au dépôt. Le jeton Companion d'un joueur
-donne accès à son identité tant qu'il n'est pas explicitement révoqué.
+## Fichiers qui ne doivent jamais être commités
+
+Ne publiez jamais les fichiers générés par un serveur déployé, notamment :
+
+- `/root/openvpn-pki/` ;
+- `/var/lib/openvpn-lan-party/enrollment/` ;
+- `/var/lib/openvpn/credential-registry.json` provenant d'un vrai déploiement ;
+- chaque `companion.json` généré et son bearer token ;
+- l'état de déploiement `/etc/openvpn-lan-companion/` ;
+- les certificats clients, clés privées, profils `.ovpn` ou réponses
+  d'enrôlement.
+
+Le dépôt contient uniquement des templates. Chaque déploiement doit générer une
+nouvelle autorité de certification et des identités de joueurs uniques.
 
 ## Frontière des membres de confiance
 

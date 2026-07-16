@@ -43,19 +43,49 @@ controls, not firewalls.
 
 ---
 
-## Français
+# LAN Party Companion — Français
 
 Le Companion est un outil de coordination authentifié, accessible uniquement
-depuis le VPN. Il affiche présence, adresse VPN, temps de connexion et latence,
-puis fournit messagerie et salons de jeu.
+depuis le VPN, normalement à l'adresse `http://10.44.0.1:8787`.
 
-Le premier enrôlement crée un jeton aléatoire ; le serveur n'en conserve que le
-hash SHA-256. Un renouvellement VPN pour le même joueur préserve
-`companion.json`. Une invitation au nom d'un autre joueur est refusée. Seul
-l'offboarding complet retire l'accès serveur ; la suppression locale exige
-explicitement `Leave-OpenVPN-LAN-Party.ps1 -RemoveCompanion`.
+## Identité
+
+La réponse d'enrôlement fournit un jeton Companion aléatoire lors du premier
+enrôlement. Le serveur ne stocke que son hash SHA-256. Le client Windows stocke
+son identité dans
+`%LOCALAPPDATA%\OpenVPN LAN Party Companion\companion.json`.
+
+Le renouvellement du credential VPN pour le même joueur préserve ce fichier et
+ce jeton. L'enrôlement d'un autre joueur est refusé avant la création de clé.
+L'offboarding serveur complet supprime le jeton ; la suppression locale de
+`companion.json` n'a lieu qu'avec le helper d'offboarding Windows explicite et
+l'option `-RemoveCompanion`.
+
+Ne publiez, ne remplacez et ne supprimez jamais sans raison un vrai
+`companion.json`.
+
+## Fonctionnalités
+
+- présence authentifiée à partir de l'adresse source VPN ;
+- durée de connexion et latence vers l'hôte Companion ;
+- interface Windows bilingue anglais/français ;
+- messages publics et privés avec identité de l'expéditeur dérivée du serveur ;
+- salons avec jeu, adresse, port facultatif et instructions de connexion ;
+- capacité, membres, ready check, phases rassemblement/en jeu et verrou ;
+- transfert d'hôte, délai de reconnexion et protection des conflits par
+  révision ;
+- actions de la zone de notification pour quitter le Companion avec ou sans
+  déconnecter le profil exact `OpenVPN-LAN-Party`.
+
+L'hôte saisit les informations de connexion au jeu. La détection automatique
+des lignes de commande des jeux est hors du périmètre actuel du produit.
+
+## Comportement opérationnel
 
 Quitter le Companion ne coupe pas le VPN. L'action **Quitter le Companion et
-déconnecter le VPN** déconnecte uniquement `OpenVPN-LAN-Party`. Le verrou d'un
-salon n'est pas un pare-feu : tous les membres du VPN restent des tiers de
-confiance.
+déconnecter le VPN** cible uniquement le profil OpenVPN GUI géré et ne termine
+jamais les processus VPN sans rapport.
+
+Le serveur recharge son registre des joueurs lorsqu'il change ; l'offboarding
+retire donc l'accès sans redémarrer le service Companion. Les verrous de salon
+sont des contrôles applicatifs, pas des pare-feu.

@@ -231,10 +231,29 @@ Tous les membres partagent le même LAN virtuel et doivent être des tiers de
 confiance. Ce projet n'est pas un VPN public multi-tenant et ne cloisonne pas les
 joueurs entre eux.
 
+## Fonctionnalités fournies
+
+- OpenVPN Community 2.7.2+ en mode TAP avec des chiffrements AEAD modernes ;
+- une CA EC P-256 nommée `OPENVPN LAN PARTY` et des certificats clients
+  individuels ;
+- des clés privées Windows CNG non exportables créées côté client ;
+- un enrôlement CSR approuvé par l'administrateur et une révocation CRL
+  immédiate ;
+- une clé `tls-crypt-v2` individuelle pour chaque credential ;
+- une invitation Windows protégée par mot de passe et téléchargée depuis le
+  portail ;
+- l'installation automatique d'OpenVPN/TAP et un assistant Windows bilingue ;
+- une connexion OpenVPN GUI persistante et indépendante du Companion ;
+- la présence, la durée de connexion, la latence vers l'hôte, les messages et
+  les salons de jeu ;
+- le mapping de ports miniupnpc facultatif et l'automatisation TLS publique
+  facultative du portail.
+
 ## Modes de sécurité
 
-Le mode est choisi pour chaque invitation ; les deux modes coexistent sur le
-même serveur.
+L'administrateur choisit un mode pour chaque invitation. Les deux modes peuvent
+coexister sur le même serveur et utilisent la même CA, le même VPN, la même CRL
+et la même politique de chiffrement moderne.
 
 | Mode | Client | Protection de la clé | TPM |
 |---|---|---|---|
@@ -248,57 +267,123 @@ maintenu et entièrement corrigé. Aucun basculement automatique n'existe.
 
 Le mode d'un credential ne se modifie pas : il faut révoquer puis ré-enrôler.
 
-## Installation Debian
+## Installer le serveur
 
-Sur une Debian 13 vierge :
+Prérequis :
+
+- un hôte ou une VM Debian 13 vierge avec accès root ;
+- une adresse IPv4 publique ou un nom DNS ;
+- les ports UDP 1194 et TCP 8790 redirigés vers l'hôte Debian ;
+- uniquement des joueurs de confiance.
+
+Exécutez :
 
 ```bash
 sudo ./install-vpn-server.sh
-sudo audit-openvpn-lan-party
 ```
 
-Le script installe OpenVPN Community 2.7.2+, Easy-RSA, miniupnpc, le portail
-d'enrôlement et le Companion. Il crée la CA `OPENVPN LAN PARTY`, la CRL et la
-clé serveur `tls-crypt-v2`, sans jamais générer de clé privée de joueur.
+L'installateur refuse d'écraser une PKI, un serveur OpenVPN ou une configuration
+Companion existants. Il demande confirmation avant d'installer des paquets et
+peut configurer miniupnpc.
+
+Validez le résultat :
+
+```bash
+sudo audit-openvpn-lan-party
+sudo systemctl status openvpn-server@server.service
+sudo systemctl status vpn-enrollment-portal.service
+sudo systemctl status lan-party-companion.service
+```
 
 ## Ajouter un joueur
+
+Exécutez l'unique commande d'administration :
 
 ```bash
 sudo vpn-enrollment-admin create --player Arthur
 ```
 
-Choisissez le mode proposé. Envoyez le lien du portail normalement, puis le mot
-de passe de l'archive et le jeton à usage unique par un autre canal de confiance.
+Le terminal propose :
 
-Le joueur extrait le ZIP, double-clique sur `JOIN-VPN.cmd`, accepte l'élévation,
-saisit les deux secrets et garde la fenêtre ouverte. L'assistant vérifie le
-bundle, installe OpenVPN/TAP si nécessaire, crée la clé CNG non exportable et
-attend l'approbation.
+1. `high-assurance` (par défaut) ;
+2. `compatible` avec une confirmation explicite du risque.
+
+Pour une création non interactive contrôlée :
+
+```bash
+sudo vpn-enrollment-admin create \
+  --player Arthur \
+  --security-mode compatible \
+  --ack-compatible-risk \
+  --no-wait
+```
+
+La sortie contient une URL de téléchargement du portail, le mot de passe de
+l'archive et un jeton à usage unique. Le jeton n'est stocké ni dans le ZIP ni
+dans l'URL. Envoyez le lien normalement, mais transmettez le mot de passe de
+l'archive et le jeton par un canal de confiance séparé.
+
+Si un service local compatible sendmail est configuré, cette commande envoie
+uniquement le lien :
+
+```bash
+sudo vpn-enrollment-admin create \
+  --player Arthur \
+  --email-to arthur@example.net
+```
+
+### Parcours du joueur Windows
+
+Le joueur :
+
+1. télécharge et extrait le ZIP avec l'Explorateur Windows ;
+2. double-clique sur `JOIN-VPN.cmd` ;
+3. accepte l'élévation ;
+4. saisit le mot de passe de l'archive et le jeton à usage unique ;
+5. laisse l'assistant ouvert pendant l'approbation de l'administrateur.
+
+L'assistant vérifie l'invitation, installe ou met à jour le MSI OpenVPN Community
+signé avec TAP-Windows6 si nécessaire, crée la clé non exportable, soumet la
+CSR, installe le certificat et le profil, teste le tunnel, confie la connexion
+persistante à OpenVPN GUI et démarre le Companion.
+
+Le profil est `%USERPROFILE%\OpenVPN\config\OpenVPN-LAN-Party.ovpn`. Fermer le
+Companion ne déconnecte pas le VPN. Les raccourcis de démarrage et du menu
+Démarrer reconnectent le VPN sans nouvel enrôlement.
+
+### Approbation de l'administrateur
 
 Le terminal Debian affiche automatiquement le joueur, le CN, l'empreinte SPKI
 complète et le code court. Comparez le code avec l'écran Windows puis répondez
-`Y` ou `N`. Pour plusieurs demandes :
+`Y` ou `N`.
+
+Pour plusieurs invitations simultanées :
 
 ```bash
+sudo vpn-enrollment-admin create --player Arthur --no-wait
+sudo vpn-enrollment-admin create --player Beatrice --no-wait
 sudo vpn-enrollment-admin pool
 ```
 
-Après approbation, l'assistant installe
-`%USERPROFILE%\OpenVPN\config\OpenVPN-LAN-Party.ovpn`, teste la connexion,
-confie la session persistante à OpenVPN GUI et démarre le Companion. Quitter le
-Companion ne coupe pas le VPN.
+La file affiche une liste numérotée et revalide la CSR sélectionnée juste avant
+la signature. Les invites d'administration du serveur sont uniquement en
+anglais.
 
-## Renouvellement et révocation
+## Renouveler ou remplacer un credential
 
-Une nouvelle invitation avec le même nom renouvelle le credential sans changer
-l'identité Companion. Confirmez la nouvelle connexion, puis révoquez l'ancienne :
+Créez une autre invitation avec le même nom de joueur. L'UUID technique du
+credential et le certificat sont renouvelés ; l'identité stable du joueur et le
+`companion.json` existant sont préservés. Révoquez l'ancien enrôlement après
+avoir confirmé la nouvelle connexion :
 
 ```bash
-sudo vpn-enrollment-admin confirm-connection IDENTIFIANT
-sudo vpn-enrollment-admin revoke IDENTIFIANT --reason "credential remplacé"
+sudo vpn-enrollment-admin confirm-connection ENROLLMENT_ID
+sudo vpn-enrollment-admin revoke ENROLLMENT_ID --reason "credential remplacé"
 ```
 
-## Départ complet d'un joueur
+## Retirer complètement un joueur
+
+L'offboarding serveur fait autorité :
 
 ```bash
 sudo vpn-enrollment-admin offboard \
@@ -306,11 +391,14 @@ sudo vpn-enrollment-admin offboard \
   --reason "départ du groupe"
 ```
 
-La commande affiche l'inventaire et demande confirmation. Elle révoque tous les
-certificats actifs, invalide les invitations, régénère la CRL, coupe les
-sessions, retire l'accès Companion et conserve les traces d'audit.
+La commande inventorie les enregistrements du joueur, demande confirmation,
+révoque chaque certificat actif, met à jour la CRL et le registre
+`tls-crypt-v2`, coupe les sessions actives, invalide les invitations en attente,
+retire l'accès Companion et désactive le mapping du joueur. Les enregistrements
+révoqués restent disponibles pour l'audit.
 
-Sur l'ancien PC, après cette révocation serveur :
+Sur le PC Windows retiré, exécutez le nettoyage local après l'offboarding
+serveur :
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass `
@@ -318,17 +406,52 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass `
   -RemoveCompanion
 ```
 
-Le helper ne supprime que l'identité `OpenVPN-LAN-Party` vérifiée. L'option
-`-RemoveCompanion` est obligatoire pour supprimer aussi l'identité locale
-Companion ; les autres profils VPN restent intacts.
+Le helper valide et supprime uniquement `OpenVPN-LAN-Party` : son profil exact,
+son certificat, sa clé CNG non exportable, ses raccourcis et — uniquement avec
+`-RemoveCompanion` — l'identité Companion locale. Il ne cible jamais un autre
+profil VPN.
 
-## Companion et confiance
+## Companion
 
-Le Companion, accessible uniquement depuis le VPN, affiche présence, adresse,
-temps de connexion et latence vers l'hôte. Il fournit messages publics/privés et
-salons avec adresse, port, instructions, capacité, ready-check, phases, verrou
-et transfert d'hôte.
+Le Companion écoute uniquement sur l'adresse VPN, normalement
+`http://10.44.0.1:8787`. Son interface Windows bilingue anglais/français fournit
+la présence authentifiée, l'adresse VPN, la durée de connexion, la latence vers
+l'hôte, les messages publics/privés et des salons contenant l'adresse de jeu,
+le port facultatif et les instructions fournis par l'hôte. L'état d'un salon
+comprend capacité, ready checks, phases rassemblement/en jeu, verrou, transfert
+d'hôte et protection des conflits par révision.
 
-Ne publiez jamais une vraie configuration `companion.json`, une invitation, un
-profil `.ovpn` ni une clé. Les membres admis sur le VPN doivent rester des tiers
-de confiance.
+Le jeton Companion est indépendant du certificat VPN. Le renouvellement d'un
+credential le préserve ; l'offboarding complet du joueur le supprime.
+
+## Frontières de sécurité
+
+- Clés de la CA et du serveur : `/root/openvpn-pki`, root uniquement.
+- État d'enrôlement : `/var/lib/openvpn-lan-party/enrollment`, root uniquement.
+- Snapshot public des credentials :
+  `/var/lib/openvpn/credential-registry.json`.
+- Configuration et TLS du portail : `/etc/openvpn-lan-party`.
+- Configuration Companion : `/etc/openvpn-lan-companion`.
+
+Le portail exposé à Internet s'exécute sous `vpnportal`, ne peut pas lire la clé
+de la CA et ne peut traiter que du matériel CSR public et borné. Root effectue
+une validation CSR indépendante avant la signature. Ne publiez jamais de
+profils générés, de clés privées, de payloads d'invitation ni un vrai
+`companion.json`.
+
+Consultez [HIGH-ASSURANCE.md](HIGH-ASSURANCE.md), [SECURITY.md](SECURITY.md),
+[COMPANION.md](COMPANION.md), [ACCEPTANCE.md](ACCEPTANCE.md),
+[SECURITY-ROADMAP.md](SECURITY-ROADMAP.md) et [TODO.md](TODO.md).
+
+## Développement
+
+```bash
+python3 -m unittest discover -s tests -v
+git diff --check
+shellcheck install-vpn-server.sh assets/vpn-enrollment-admin.in \
+  assets/audit-openvpn-lan-party
+```
+
+`build-release.sh` exige une arborescence de travail propre et un tag annoté
+correspondant à `VERSION`. Il refuse les secrets générés, profils, invitations
+et `companion.json`.

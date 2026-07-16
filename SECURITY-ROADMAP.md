@@ -62,24 +62,70 @@ provider.
 
 ---
 
-## Feuille de route — Français
+# Feuille de route sécurité — Français
 
-La base actuelle impose des clés P-256 CNG non exportables, l'approbation SPKI,
-un certificat et une clé `tls-crypt-v2` par credential, une CRL et un portail
-non privilégié séparé de la CA root.
+## Base actuelle
 
-Les parcours Windows 11 haute assurance, perte de clé/ré-enrôlement et Windows
-10 22H2 compatible sont validés sur matériel réel. Restent prioritaires le test
-avec un vrai jeu, la coexistence simultanée des deux modes, l'offboarding
-compatible et l'audit d'une Debian 13 neuve.
+- clés ECDSA P-256 non exportables créées côté client ;
+- mode haute assurance adossé au TPM et mode compatible logiciel explicite ;
+- approbation administrateur de l'empreinte SPKI complète ;
+- certificat, CRL et clé `tls-crypt-v2` individuels par credential ;
+- portail non privilégié et borné, séparé de la frontière de la CA root ;
+- révocation immédiate du credential et offboarding complet du joueur ;
+- aucun `tls-crypt` partagé, compression ou fallback vers un chiffrement ancien.
 
-Viennent ensuite les exercices chiffrés de sauvegarde/restauration, l'inventaire
-de révocation et les alertes d'expiration, la rotation des jetons Companion, la
-signature reproductible de l'application Windows et une matrice matérielle plus
-large. L'attestation TPM distante reste exploratoire.
+## État de validation
 
-P-256 demeure le choix obligatoire pour l'interopérabilité vérifiée. P-521 ne
-sera pas adopté sans preuve matérielle multi-fournisseur et bénéfice global
-démontré. Aucun changement ne doit créer de fallback automatique, convertir un
-credential existant ou transformer ce LAN de tiers de confiance en service
-public multi-tenant.
+Validé sur du vrai matériel Windows :
+
+- enrôlement Windows 11 haute assurance, clé TPM non exportable, connexion VPN
+  persistante et démarrage du Companion ;
+- nettoyage exact après perte de clé, comportement de révocation et
+  ré-enrôlement ;
+- installation, enrôlement et connexion VPN compatibles sous Windows 10 22H2.
+
+Pas encore validé comme matrice complète :
+
+- trafic d'un vrai jeu sur le poste compatible Windows 10 ;
+- clients high-assurance et compatible connectés simultanément ;
+- offboarding compatible sous Windows 10 ;
+- installation Debian 13 neuve avec audit de sécurité entièrement PASS.
+
+## Candidats priorisés
+
+### P0 — terminer la recette
+
+- terminer les quatre tests sur systèmes réels listés ci-dessus ;
+- consigner des preuves de recette reproductibles sans commiter d'identités de
+  joueurs, profils, jetons, adresses publiques ni identifiants TPM/CNG.
+
+### P1 — sécurité opérationnelle
+
+- exercices chiffrés et documentés de sauvegarde/restauration de la CA et de
+  l'état réservé à root ;
+- inventaire de révocation enrichi et notifications planifiées d'expiration des
+  certificats ;
+- rotation et récupération des jetons Companion indépendamment de l'enrôlement
+  VPN ;
+- paquet applicatif Windows signé avec provenance reproductible ;
+- matrice matérielle réelle plus large sur les éditions Windows maintenues.
+
+### P2 — assurance supplémentaire
+
+- attestation TPM distante facultative lorsque l'interopérabilité Windows et
+  OpenVPN est démontrée comme fiable et sans dépendance d'enrôlement fragile.
+
+Ces éléments ne doivent ni affaiblir le comportement fail-closed, ni introduire
+un fallback automatique du mode de sécurité, ni permettre la conversion en
+place du fournisseur de clé d'un credential.
+
+## Décisions enregistrées
+
+- ECDSA P-256 reste la courbe obligatoire car elle offre la meilleure
+  interopérabilité vérifiée entre Windows CNG, les fournisseurs TPM et OpenVPN
+  Community.
+- P-521 n'est pas un objectif de sécurité en soi et ne remplacera pas P-256 sans
+  preuve matérielle multi-fournisseur et bénéfice système démontré.
+- Les joueurs inconnus ou mutuellement hostiles restent hors du modèle de
+  menace ; l'ajout d'une isolation réseau constituerait un produit multi-tenant
+  distinct.
