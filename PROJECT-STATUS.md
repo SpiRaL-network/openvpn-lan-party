@@ -9,7 +9,8 @@ Version: `1.0.1`
   individual `tls-crypt-v2` metadata.
 - Per-invitation `high-assurance` and `compatible` modes on one server.
 - Client-side non-exportable Windows CNG keys; no player private key on Debian.
-- Protected portal ZIP, bilingual one-window setup and persistent OpenVPN GUI.
+- Protected portal ZIP, bilingual one-window setup, persistent OpenVPN GUI and
+  exact-profile reconnect when the Companion starts.
 - Root-only approval pool supporting simultaneous invitations.
 - Single administration interface: `vpn-enrollment-admin`.
 - Complete player offboarding and exact Windows local cleanup helper.
@@ -74,8 +75,8 @@ Version : `1.0.1`
 - Modes `high-assurance` et `compatible` par invitation sur un même serveur.
 - Clés Windows CNG non exportables créées côté client ; aucune clé privée de
   joueur sur Debian.
-- ZIP protégé sur le portail, assistant bilingue à fenêtre unique et OpenVPN GUI
-  persistant.
+- ZIP protégé sur le portail, assistant bilingue à fenêtre unique, OpenVPN GUI
+  persistant et reconnexion du profil exact au lancement du Companion.
 - File d'approbation root prenant en charge les invitations simultanées.
 - Interface d'administration unique : `vpn-enrollment-admin`.
 - Offboarding complet du joueur et helper de nettoyage Windows exact.

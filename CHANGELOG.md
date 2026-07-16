@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Fix compatible-mode cleanup to use the logical CNG key container name.
+- Reconnect the exact managed VPN profile automatically when the Companion
+  starts while its service is unreachable.
+
 ## 1.0.1
 
 - Clarify that the first Windows onboarding secret is the archive password.
@@ -21,6 +27,13 @@
 ---
 
 # Journal des modifications — Français
+
+## Non publié
+
+- Correction du nettoyage compatible pour utiliser le nom logique du conteneur
+  de clé CNG.
+- Reconnexion automatique du profil VPN géré exact lorsque le Companion démarre
+  alors que son service est injoignable.
 
 ## 1.0.1
 

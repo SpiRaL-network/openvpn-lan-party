@@ -58,6 +58,8 @@ an unchecked or unexecuted item.
   correctly.
 - OpenVPN/TAP installation, approval, profile creation and connection complete.
 - OpenVPN GUI retains the tunnel after the Companion exits and after logon.
+- Launching the Companion with the tunnel disconnected reconnects only the
+  exact managed `OpenVPN-LAN-Party` profile.
 - Desktop, Startup and Start Menu shortcuts are present.
 - Companion identity matches the invitation player.
 
@@ -161,6 +163,8 @@ La checklist ci-dessous reste normative. Aucun résultat n'est déduit d'un
   connexion réussissent.
 - OpenVPN GUI conserve le tunnel après la fermeture du Companion et après
   l'ouverture de session.
+- Lancer le Companion lorsque le tunnel est déconnecté reconnecte uniquement le
+  profil géré exact `OpenVPN-LAN-Party`.
 - Les raccourcis Bureau, Démarrage et menu Démarrer sont présents.
 - L'identité Companion correspond au joueur de l'invitation.
 

@@ -15,6 +15,8 @@ secret or player identity.
   `audit-openvpn-lan-party` with the `OPENVPN LAN PARTY` EC P-256 CA.
 - [ ] Offboard a compatible identity on real Windows 10 hardware and verify
   immediate server cutoff plus exact local cleanup.
+- [ ] Launch the Companion with a disconnected tunnel on real Windows 10 and
+  Windows 11 systems and verify exact-profile automatic reconnection.
 
 ## P1 — operational hardening
 
@@ -65,6 +67,9 @@ identité de joueur.
   `OPENVPN LAN PARTY`.
 - [ ] Offboarder une identité compatible sur du vrai matériel Windows 10 et
   vérifier la coupure serveur immédiate ainsi que le nettoyage local exact.
+- [ ] Lancer le Companion avec le tunnel déconnecté sur de vrais systèmes
+  Windows 10 et Windows 11 et vérifier la reconnexion automatique du profil
+  exact.
 
 ## P1 — durcissement opérationnel
 

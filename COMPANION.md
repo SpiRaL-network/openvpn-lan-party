@@ -34,8 +34,10 @@ is outside the current product scope.
 ## Operational behavior
 
 OpenVPN GUI owns the persistent tunnel. Closing the Companion leaves the VPN
-connected. **Quit Companion and disconnect VPN** targets only the managed
-OpenVPN GUI profile and never terminates unrelated VPN processes.
+connected. Launching the Companion while its service is unreachable validates
+the exact managed profile and asks OpenVPN GUI to connect only
+`OpenVPN-LAN-Party`. **Quit Companion and disconnect VPN** targets only that
+managed OpenVPN GUI profile and never terminates unrelated VPN processes.
 
 The server reloads its player registry when it changes, so offboarding removes
 access without restarting the Companion service. Lobby locks are application
@@ -82,8 +84,10 @@ des lignes de commande des jeux est hors du périmètre actuel du produit.
 
 ## Comportement opérationnel
 
-Quitter le Companion ne coupe pas le VPN. L'action **Quitter le Companion et
-déconnecter le VPN** cible uniquement le profil OpenVPN GUI géré et ne termine
+Quitter le Companion ne coupe pas le VPN. Lancer le Companion lorsque son
+service est injoignable valide le profil géré exact et demande à OpenVPN GUI de
+connecter uniquement `OpenVPN-LAN-Party`. L'action **Quitter le Companion et
+déconnecter le VPN** cible uniquement ce profil OpenVPN GUI géré et ne termine
 jamais les processus VPN sans rapport.
 
 Le serveur recharge son registre des joueurs lorsqu'il change ; l'offboarding

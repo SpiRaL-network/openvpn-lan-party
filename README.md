@@ -118,7 +118,8 @@ the persistent connection to OpenVPN GUI and starts the Companion.
 
 The profile is `%USERPROFILE%\OpenVPN\config\OpenVPN-LAN-Party.ovpn`. Closing
 the Companion does not disconnect the VPN. Startup and Start Menu shortcuts
-reconnect without another enrollment.
+reconnect without another enrollment. Launching the Companion while the tunnel
+is disconnected validates and reconnects only this exact managed profile.
 
 ### Administrator approval
 
@@ -349,7 +350,8 @@ persistante à OpenVPN GUI et démarre le Companion.
 
 Le profil est `%USERPROFILE%\OpenVPN\config\OpenVPN-LAN-Party.ovpn`. Fermer le
 Companion ne déconnecte pas le VPN. Les raccourcis de démarrage et du menu
-Démarrer reconnectent le VPN sans nouvel enrôlement.
+Démarrer reconnectent le VPN sans nouvel enrôlement. Lancer le Companion lorsque
+le tunnel est déconnecté valide et reconnecte uniquement ce profil géré exact.
 
 ### Approbation de l'administrateur
 

@@ -117,6 +117,13 @@ $script:Texts = @{
         exit_and_disconnect_vpn = 'Quit Companion and disconnect VPN'
         confirm_disconnect_vpn = 'Disconnect OpenVPN LAN Party and quit the Companion?'
         vpn_disconnect_failed = 'OpenVPN LAN Party could not be disconnected: {0}'
+        vpn_connecting = 'Connecting OpenVPN LAN Party…'
+        vpn_connect_failed = 'OpenVPN LAN Party could not be connected automatically: {0}'
+        vpn_profile_missing = 'The managed OpenVPN-LAN-Party profile was not found.'
+        vpn_profile_ambiguous = 'More than one managed OpenVPN-LAN-Party profile exists.'
+        vpn_profile_invalid = 'The OpenVPN-LAN-Party profile is not a valid managed profile.'
+        vpn_gui_missing = 'OpenVPN GUI is not installed in the expected location.'
+        vpn_connect_timeout = 'The VPN did not become reachable within 60 seconds.'
         connected = 'Connected to LAN Party Companion'
         connected_details = 'Connected — server v{0} — session {1}'
         activity_lobby = 'In lobby'
@@ -298,6 +305,13 @@ $script:Texts = @{
         exit_and_disconnect_vpn = 'Quitter le Companion et déconnecter le VPN'
         confirm_disconnect_vpn = 'Déconnecter OpenVPN LAN Party et quitter le Companion ?'
         vpn_disconnect_failed = 'Impossible de déconnecter OpenVPN LAN Party : {0}'
+        vpn_connecting = 'Connexion à OpenVPN LAN Party…'
+        vpn_connect_failed = 'Impossible de connecter automatiquement OpenVPN LAN Party : {0}'
+        vpn_profile_missing = 'Le profil OpenVPN-LAN-Party géré est introuvable.'
+        vpn_profile_ambiguous = 'Plusieurs profils OpenVPN-LAN-Party gérés existent.'
+        vpn_profile_invalid = "Le profil OpenVPN-LAN-Party n’est pas un profil géré valide."
+        vpn_gui_missing = "OpenVPN GUI n’est pas installé à l’emplacement attendu."
+        vpn_connect_timeout = "Le VPN n’est pas devenu joignable dans les 60 secondes."
         connected = 'Connecté à LAN Party Companion'
         connected_details = 'Connecté — serveur v{0} — session {1}'
         activity_lobby = 'Dans un salon'
@@ -633,17 +647,98 @@ function Format-CompanionDuration {
     return '{0}m {1}s' -f $duration.Minutes, $duration.Seconds
 }
 
-function Disconnect-LanPartyOpenVpn {
+function Test-CompanionTcpEndpoint {
+    $uri = [Uri]$script:ServerUrl
+    $port = if ($uri.IsDefaultPort) { 80 } else { $uri.Port }
+    $client = New-Object Net.Sockets.TcpClient
+    $pending = $null
+    try {
+        $pending = $client.BeginConnect($uri.DnsSafeHost, $port, $null, $null)
+        if (-not $pending.AsyncWaitHandle.WaitOne(500, $false)) { return $false }
+        $client.EndConnect($pending)
+        return $client.Connected
+    }
+    catch { return $false }
+    finally {
+        if ($pending) { $pending.AsyncWaitHandle.Close() }
+        $client.Close()
+    }
+}
+
+function Get-ManagedLanPartyProfile {
+    $candidates = @(
+        (Join-Path $env:USERPROFILE 'OpenVPN\config\OpenVPN-LAN-Party.ovpn'),
+        (Join-Path $env:USERPROFILE 'Documents\OpenVPN\config\OpenVPN-LAN-Party.ovpn')
+    ) | Select-Object -Unique
+    $profiles = @($candidates | ForEach-Object {
+        if (Test-Path -LiteralPath $_ -PathType Leaf) {
+            Get-Item -LiteralPath $_ -Force
+        }
+    })
+    if ($profiles.Count -eq 0) { throw (T 'vpn_profile_missing') }
+    if ($profiles.Count -ne 1) { throw (T 'vpn_profile_ambiguous') }
+    $profileItem = $profiles[0]
+    if (($profileItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or
+        $profileItem.Length -gt 262144) {
+        throw (T 'vpn_profile_invalid')
+    }
+    $profile = [IO.File]::ReadAllText($profileItem.FullName)
+    $playerPattern = [regex]::Escape([string]$script:Config.player)
+    if ($profile -notmatch '(?im)^# openvpn-lan-party-security-mode: (high-assurance|compatible)\s*$' -or
+        $profile -notmatch '(?im)^\s*cryptoapicert\s+"THUMB:[A-F0-9]{40}"\s*$' -or
+        $profile -notmatch "(?m)^# openvpn-lan-party-player: $playerPattern\s*`$") {
+        throw (T 'vpn_profile_invalid')
+    }
+    return $profileItem
+}
+
+function Get-LanPartyOpenVpnGui {
     $openVpnGui = Join-Path ([Environment]::GetFolderPath('ProgramFiles')) 'OpenVPN\bin\openvpn-gui.exe'
     if (-not (Test-Path -LiteralPath $openVpnGui -PathType Leaf)) {
-        throw "OpenVPN GUI executable not found: $openVpnGui"
+        throw (T 'vpn_gui_missing')
     }
-    $command = Start-Process -FilePath $openVpnGui -ArgumentList @(
-        '--command', 'disconnect', 'OpenVPN-LAN-Party'
-    ) -WindowStyle Hidden -Wait -PassThru
-    if ($command.ExitCode -ne 0) {
-        throw "openvpn-gui.exe returned exit code $($command.ExitCode)"
+    return $openVpnGui
+}
+
+function Invoke-LanPartyOpenVpnGuiCommand {
+    param(
+        [Parameter(Mandatory = $true)][string]$OpenVpnGui,
+        [Parameter(Mandatory = $true)][ValidateSet('rescan', 'connect', 'disconnect')][string]$Command
+    )
+    $arguments = @('--command', $Command)
+    if ($Command -ne 'rescan') { $arguments += 'OpenVPN-LAN-Party' }
+    $process = Start-Process -FilePath $OpenVpnGui -ArgumentList $arguments `
+        -WindowStyle Hidden -PassThru
+    try {
+        # A newly started GUI becomes the resident tray process and must not be
+        # waited on indefinitely. A command sent to an existing GUI exits fast.
+        if ($process.WaitForExit(5000) -and $process.ExitCode -ne 0) {
+            throw "openvpn-gui.exe returned exit code $($process.ExitCode)"
+        }
     }
+    finally { $process.Dispose() }
+}
+
+function Connect-LanPartyOpenVpn {
+    if (Test-CompanionTcpEndpoint) { return }
+    [void](Get-ManagedLanPartyProfile)
+    $openVpnGui = Get-LanPartyOpenVpnGui
+    Invoke-LanPartyOpenVpnGuiCommand -OpenVpnGui $openVpnGui -Command rescan
+    Start-Sleep -Milliseconds 750
+    Invoke-LanPartyOpenVpnGuiCommand -OpenVpnGui $openVpnGui -Command connect
+    $deadline = [DateTime]::UtcNow.AddSeconds(60)
+    do {
+        if ($script:ExitRequested) { return }
+        if (Test-CompanionTcpEndpoint) { return }
+        [Windows.Forms.Application]::DoEvents()
+        Start-Sleep -Milliseconds 500
+    } while ([DateTime]::UtcNow -lt $deadline)
+    throw (T 'vpn_connect_timeout')
+}
+
+function Disconnect-LanPartyOpenVpn {
+    $openVpnGui = Get-LanPartyOpenVpnGui
+    Invoke-LanPartyOpenVpnGuiCommand -OpenVpnGui $openVpnGui -Command disconnect
 }
 
 function Exit-CompanionOnly {
@@ -2187,8 +2282,33 @@ try {
         Update-LatencyProbe
         Refresh-CompanionState
     })
+    $script:VpnAutoConnectTimer = New-Object Windows.Forms.Timer
+    $script:VpnAutoConnectTimer.Interval = 250
+    $script:VpnAutoConnectTimer.Add_Tick({
+        $script:VpnAutoConnectTimer.Stop()
+        if (Test-CompanionTcpEndpoint) {
+            Refresh-CompanionState -Force
+            return
+        }
+        $script:PollTimer.Stop()
+        $script:ConnectionLabel.Text = T 'vpn_connecting'
+        $script:ConnectionLabel.ForeColor = [Drawing.Color]::DarkOrange
+        try { Connect-LanPartyOpenVpn }
+        catch {
+            $script:NotifyIcon.BalloonTipTitle = T 'app_title'
+            $script:NotifyIcon.BalloonTipText = (T 'vpn_connect_failed' @($_.Exception.Message))
+            $script:NotifyIcon.ShowBalloonTip(5000)
+        }
+        finally {
+            if (-not $script:ExitRequested) {
+                $script:NextRefreshAt = [DateTime]::UtcNow
+                Refresh-CompanionState -Force
+                $script:PollTimer.Start()
+            }
+        }
+    })
     $script:PollTimer.Start()
-    Refresh-CompanionState -Force
+    $script:VpnAutoConnectTimer.Start()
     [Windows.Forms.Application]::Run($script:Form)
 }
 catch {
@@ -2215,6 +2335,10 @@ finally {
     if (Get-Variable -Name PollTimer -Scope Script -ErrorAction SilentlyContinue) {
         $script:PollTimer.Stop()
         $script:PollTimer.Dispose()
+    }
+    if (Get-Variable -Name VpnAutoConnectTimer -Scope Script -ErrorAction SilentlyContinue) {
+        $script:VpnAutoConnectTimer.Stop()
+        $script:VpnAutoConnectTimer.Dispose()
     }
     if (Get-Variable -Name ToolTip -Scope Script -ErrorAction SilentlyContinue) {
         $script:ToolTip.Dispose()
